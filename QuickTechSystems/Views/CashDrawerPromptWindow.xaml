@@ -1,0 +1,49 @@
+﻿<Window x:Class="QuickTechSystems.WPF.Views.CashDrawerPromptWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="{DynamicResource Drawer_OpeningTitle}" 
+        Height="300" 
+        Width="400"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="ToolWindow"
+        ResizeMode="NoResize">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <TextBlock Text="{DynamicResource Drawer_OpeningCashDrawer}"
+                 FontSize="20"
+                 FontWeight="Bold"
+                 Margin="0,0,0,20"/>
+        <StackPanel Grid.Row="1">
+            <TextBlock Text="{DynamicResource Transaction_Cashier}"
+                     Margin="0,0,0,5"/>
+            <TextBlock Text="{Binding CashierName}"
+                     FontWeight="SemiBold"
+                     Margin="0,0,0,20"/>
+        </StackPanel>
+        <StackPanel Grid.Row="2">
+            <TextBlock Text="{DynamicResource Drawer_EnterOpeningBalance}"
+                     Margin="0,0,0,5"/>
+            <TextBox Text="{Binding OpeningBalance, UpdateSourceTrigger=PropertyChanged}"
+                    FontSize="18"
+                    Padding="10"
+                    PreviewTextInput="NumberValidationTextBox"/>
+            <TextBlock Text="{Binding ErrorMessage}"
+                     Foreground="Red"
+                     Margin="0,5,0,0"
+                     TextWrapping="Wrap"/>
+        </StackPanel>
+        <Button Grid.Row="4"
+                Content="{DynamicResource Drawer_OpenDrawer}"
+                Command="{Binding OpenDrawerCommand}"
+                Height="40"
+                Background="#2ECC71"
+                Foreground="White"
+                FontWeight="SemiBold"/>
+    </Grid>
+</Window>

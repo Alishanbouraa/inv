@@ -1,0 +1,480 @@
+﻿<UserControl x:Class="QuickTechSystems.WPF.Views.DrawerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:converters="clr-namespace:QuickTechSystems.WPF.Converters"
+             mc:Ignorable="d"
+             x:Name="DrawerViewRoot">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converters:InvertBooleanConverter x:Key="InvertBooleanConverter"/>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0" Margin="0,0,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,16,0">
+                    <TextBlock Text="Drawer Session:" 
+                              VerticalAlignment="Center" 
+                              Margin="0,0,8,0"/>
+                    <ComboBox ItemsSource="{Binding DrawerSessions}"
+                             SelectedItem="{Binding SelectedDrawerSession}"
+                             DisplayMemberPath="DisplayText"
+                             Width="400"
+                             Margin="0,0,8,0"/>
+                    <Button Content="Current" 
+                           Command="{Binding ViewCurrentSessionCommand}"
+                           Width="80"
+                           Margin="0,0,8,0"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <TextBlock Text="Session Filter:" 
+                              VerticalAlignment="Center" 
+                              Margin="0,0,8,0"/>
+                    <DatePicker SelectedDate="{Binding SessionStartDate}"
+                               Width="120"
+                               Margin="0,0,4,0"/>
+                    <TextBlock Text="to" 
+                              VerticalAlignment="Center" 
+                              Margin="0,0,4,0"/>
+                    <DatePicker SelectedDate="{Binding SessionEndDate}"
+                               Width="120"
+                               Margin="0,0,8,0"/>
+                    <Button Command="{Binding ApplySessionFilterCommand}"
+                            Content="Load Sessions"
+                            Width="100"/>
+                </StackPanel>
+            </Grid>
+
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <Button Grid.Column="0" 
+                        Name="SummaryButton"
+                        Click="SummaryButton_Click"
+                        Margin="0,0,16,0"
+                        Width="100">
+                    <TextBlock Text="Summary"/>
+                </Button>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button x:Name="TabCurrentDrawer" 
+                            Tag="Selected" 
+                            Click="TabButton_Click">
+                        <TextBlock Text="Current Drawer"/>
+                    </Button>
+
+                    <Button x:Name="TabTransactionHistory" 
+                            Click="TabButton_Click">
+                        <TextBlock Text="Transaction History"/>
+                    </Button>
+
+                    <Button x:Name="TabProfitAnalysis" 
+                            Click="TabButton_Click">
+                        <TextBlock Text="Profit Analysis"/>
+                    </Button>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="16,0,0,0">
+                    <TextBlock Text="Transaction Range:" 
+                              VerticalAlignment="Center" 
+                              Margin="0,0,8,0"/>
+                    <DatePicker SelectedDate="{Binding StartDate}"
+                               Width="120"
+                               Margin="0,0,4,0"/>
+                    <TextBlock Text="to" 
+                              VerticalAlignment="Center" 
+                              Margin="0,0,4,0"/>
+                    <DatePicker SelectedDate="{Binding EndDate}"
+                               Width="120"
+                               Margin="0,0,8,0"/>
+                    <Button Command="{Binding ApplyDateFilterCommand}"
+                            Width="120">
+                        <TextBlock Text="Apply Filter"/>
+                    </Button>
+                </StackPanel>
+
+                <Button Grid.Column="4" 
+                        Name="ActionsButton"
+                        Click="ActionsButton_Click"
+                        Width="100"
+                        IsEnabled="{Binding IsViewingHistoricalSession, Converter={StaticResource InvertBooleanConverter}}">
+                    <TextBlock Text="Actions"/>
+                </Button>
+            </Grid>
+        </Grid>
+
+        <Border Grid.Row="1" Margin="10" BorderThickness="1" BorderBrush="Gray">
+            <Grid>
+                <ScrollViewer x:Name="CurrentDrawerView" 
+                             VerticalScrollBarVisibility="Auto" 
+                             HorizontalScrollBarVisibility="Auto"
+                             Visibility="Visible">
+                    <DataGrid ItemsSource="{Binding DrawerHistory}"
+                             AutoGenerateColumns="False"
+                             IsReadOnly="True"
+                             LoadingRow="DataGrid_LoadingRow"
+                             MinHeight="400"
+                             Margin="10">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Date &amp; Time" 
+                                              Binding="{Binding Timestamp, StringFormat=g}"
+                                              Width="150"/>
+                            <DataGridTextColumn Header="Transaction Type" 
+                                              Binding="{Binding ActionType}"
+                                              Width="150"/>
+                            <DataGridTextColumn Header="Transaction Details" 
+                                              Binding="{Binding Description}"
+                                              Width="150"/>
+                            <DataGridTextColumn Header="Transaction Amount" 
+                                              Binding="{Binding Amount, StringFormat=C2}"
+                                              Width="130"/>
+                            <DataGridTextColumn Header="Resulting Balance" 
+                                              Binding="{Binding ResultingBalance, StringFormat=C2}"
+                                              Width="130"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </ScrollViewer>
+
+                <ContentControl x:Name="TransactionHistoryView" 
+                               Content="{Binding TransactionHistoryViewModel}"
+                               Visibility="Collapsed"/>
+
+                <ContentControl x:Name="ProfitAnalysisView" 
+                               Content="{Binding ProfitViewModel}"
+                               Visibility="Collapsed"/>
+            </Grid>
+        </Border>
+
+        <Popup x:Name="ActionsPopup" 
+               PlacementTarget="{Binding ElementName=ActionsButton}"
+               Placement="Bottom"
+               Width="200" 
+               StaysOpen="False">
+            <Border BorderThickness="1" BorderBrush="Gray" Background="White">
+                <StackPanel>
+                    <Button IsEnabled="{Binding CanOpenDrawer}"
+                            Click="OpenDrawerCommand_Execute">
+                        <TextBlock Text="Open Drawer"/>
+                    </Button>
+
+                    <Separator/>
+
+                    <Button IsEnabled="{Binding IsDrawerOpen}"
+                            Click="AddCashCommand_Execute">
+                        <TextBlock Text="Add Cash"/>
+                    </Button>
+
+                    <Button IsEnabled="{Binding IsDrawerOpen}"
+                            Click="RemoveCashCommand_Execute">
+                        <TextBlock Text="Remove Cash"/>
+                    </Button>
+
+                    <Separator/>
+
+                    <Button IsEnabled="{Binding IsDrawerOpen}"
+                            Click="CloseDrawerCommand_Execute">
+                        <TextBlock Text="Close Drawer"/>
+                    </Button>
+
+                    <Separator/>
+
+                    <Button IsEnabled="{Binding IsDrawerOpen}"
+                            Click="PrintReportCommand_Execute">
+                        <TextBlock Text="Print Report"/>
+                    </Button>
+
+                    <Button Click="RefreshDataCommand_Execute">
+                        <TextBlock Text="Refresh Data"/>
+                    </Button>
+                </StackPanel>
+            </Border>
+        </Popup>
+
+        <Popup x:Name="AddCashPopup" 
+               PlacementTarget="{Binding ElementName=ActionsButton}"
+               Placement="Bottom"
+               Width="400" 
+               StaysOpen="False">
+            <Border BorderThickness="1" BorderBrush="Gray" Background="White">
+                <Grid Margin="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" 
+                               Text="Add Cash" 
+                               Margin="0,0,0,16"/>
+
+                    <StackPanel Grid.Row="1" Margin="0,0,0,12">
+                        <TextBlock Text="Amount:" Margin="0,0,0,8"/>
+                        <TextBox Width="Auto" 
+                                 Text="{Binding CashAmount, StringFormat=N2, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="2" Margin="0,0,0,20">
+                        <TextBlock Text="Description:" Margin="0,0,0,8"/>
+                        <TextBox Width="Auto" 
+                                 Text="{Binding CashDescription, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="3" 
+                                Orientation="Horizontal" 
+                                HorizontalAlignment="Right">
+                        <Button Click="ClosePopup_Click">
+                            <TextBlock Text="Cancel"/>
+                        </Button>
+                        <Button Margin="8,0,0,0"
+                                Width="100"
+                                Command="{Binding AddCashCommand}"
+                                Click="AddCashConfirm_Click">
+                            <TextBlock Text="Add Cash"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Popup>
+
+        <Popup x:Name="RemoveCashPopup" 
+               PlacementTarget="{Binding ElementName=ActionsButton}"
+               Placement="Bottom"
+               Width="400" 
+               StaysOpen="False">
+            <Border BorderThickness="1" BorderBrush="Gray" Background="White">
+                <Grid Margin="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" 
+                               Text="Remove Cash" 
+                               Margin="0,0,0,16"/>
+
+                    <StackPanel Grid.Row="1" Margin="0,0,0,12">
+                        <TextBlock Text="Amount:" Margin="0,0,0,8"/>
+                        <TextBox Width="Auto" 
+                                 Text="{Binding CashAmount, StringFormat=N2, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="2" Margin="0,0,0,20">
+                        <TextBlock Text="Reason:" Margin="0,0,0,8"/>
+                        <TextBox Width="Auto" 
+                                 Text="{Binding CashDescription, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="3" 
+                                Orientation="Horizontal" 
+                                HorizontalAlignment="Right">
+                        <Button Click="ClosePopup_Click">
+                            <TextBlock Text="Cancel"/>
+                        </Button>
+                        <Button Margin="8,0,0,0"
+                                Width="120"
+                                Command="{Binding RemoveCashCommand}"
+                                Click="RemoveCashConfirm_Click">
+                            <TextBlock Text="Remove Cash"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Popup>
+
+        <Popup x:Name="OpenDrawerPopup" 
+       PlacementTarget="{Binding ElementName=ActionsButton}"
+       Placement="Bottom"
+       Width="400" 
+       StaysOpen="False">
+            <Border BorderThickness="1" BorderBrush="Gray" Background="White">
+                <Grid Margin="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" 
+                       Text="Open Drawer" 
+                       FontWeight="Bold"
+                       FontSize="16"
+                       Margin="0,0,0,16"/>
+
+                    <StackPanel Grid.Row="1" Margin="0,0,0,20">
+                        <TextBlock Text="Initial Cash Amount:" Margin="0,0,0,8"/>
+                        <TextBox Width="Auto" 
+                         Text="{Binding InitialCashAmount, StringFormat=N2, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="2" 
+                        Orientation="Horizontal" 
+                        HorizontalAlignment="Right">
+                        <Button Click="ClosePopup_Click"
+                        Width="80"
+                        Margin="0,0,8,0">
+                            <TextBlock Text="Cancel"/>
+                        </Button>
+                        <Button Width="120"
+                        Click="OpenDrawerConfirm_Click">
+                            <TextBlock Text="Open Drawer"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Popup>
+
+        <Popup x:Name="CloseDrawerPopup" 
+               PlacementTarget="{Binding ElementName=ActionsButton}"
+               Placement="Bottom"
+               Width="400" 
+               StaysOpen="False">
+            <Border BorderThickness="1" BorderBrush="Gray" Background="White">
+                <Grid Margin="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" 
+                               Text="Close Drawer" 
+                               Margin="0,0,0,16"/>
+
+                    <StackPanel Grid.Row="1" Margin="0,0,0,20">
+                        <TextBlock Text="Actual Cash Count:" Margin="0,0,0,8"/>
+                        <TextBox Width="Auto" 
+                                 Text="{Binding FinalCashAmount, StringFormat=N2, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <TextBlock Text="Expected Amount:" Margin="0,16,0,4"/>
+                        <TextBlock Text="{Binding CurrentDrawer.ExpectedBalance, StringFormat=C2}"/>
+
+                        <TextBlock Text="Difference:" Margin="0,16,0,4"/>
+                        <TextBlock Text="{Binding DrawerClosingDifference, StringFormat=C2}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="2" 
+                                Orientation="Horizontal" 
+                                HorizontalAlignment="Right">
+                        <Button Click="ClosePopup_Click">
+                            <TextBlock Text="Cancel"/>
+                        </Button>
+                        <Button Margin="8,0,0,0"
+        Width="120"
+        Click="RemoveCashConfirm_Click">
+                            <TextBlock Text="Remove Cash"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Popup>
+
+        <Popup x:Name="PrintReportPopup" 
+               PlacementTarget="{Binding ElementName=ActionsButton}"
+               Placement="Bottom"
+               Width="400" 
+               StaysOpen="False">
+            <Border BorderThickness="1" BorderBrush="Gray" Background="White">
+                <Grid Margin="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" 
+                               Text="Print Report" 
+                               Margin="0,0,0,16"/>
+
+                    <StackPanel Grid.Row="1" Margin="0,0,0,20">
+                        <CheckBox Content="Include Transaction Details" 
+                                  IsChecked="{Binding IncludeTransactionDetails}"
+                                  Margin="0,0,0,8"/>
+                        <CheckBox Content="Include Financial Summary" 
+                                  IsChecked="{Binding IncludeFinancialSummary}"
+                                  Margin="0,0,0,8"/>
+                        <CheckBox Content="Print Cashier Copy" 
+                                  IsChecked="{Binding PrintCashierCopy}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="2" 
+                                Orientation="Horizontal" 
+                                HorizontalAlignment="Right">
+                        <Button Click="ClosePopup_Click">
+                            <TextBlock Text="Cancel"/>
+                        </Button>
+                        <Button Margin="8,0,0,0"
+                                Width="100"
+                                Command="{Binding PrintReportCommand}"
+                                Click="PrintReportConfirm_Click">
+                            <TextBlock Text="Print"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Popup>
+
+        <Border Visibility="{Binding IsProcessing, Converter={StaticResource BooleanToVisibilityConverter}}"
+                Grid.RowSpan="2"
+                Background="#80000000">
+            <Border Background="White"
+                    BorderBrush="Gray"
+                    BorderThickness="1"
+                    Padding="20"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+                <StackPanel>
+                    <ProgressBar IsIndeterminate="True"
+                                Width="200"
+                                Height="2"
+                                Margin="0,0,0,10"/>
+                    <TextBlock Text="Processing"
+                              HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+        </Border>
+
+        <TextBlock Text="{Binding ErrorMessage}"
+                  HorizontalAlignment="Center"
+                  VerticalAlignment="Top"
+                  Margin="0,10"
+                  Grid.RowSpan="2">
+            <TextBlock.Visibility>
+                <Binding Path="ErrorMessage">
+                    <Binding.Converter>
+                        <BooleanToVisibilityConverter/>
+                    </Binding.Converter>
+                </Binding>
+            </TextBlock.Visibility>
+        </TextBlock>
+    </Grid>
+</UserControl>

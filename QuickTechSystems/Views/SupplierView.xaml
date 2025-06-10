@@ -1,0 +1,173 @@
+﻿<UserControl x:Class="QuickTechSystems.WPF.Views.SupplierView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             FlowDirection="{Binding CurrentFlowDirection}"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:QuickTechSystems.WPF.Views"
+             xmlns:converters="clr-namespace:QuickTechSystems.WPF.Converters"
+             mc:Ignorable="d"
+             x:Name="SupplierViewRoot">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    </UserControl.Resources>
+
+    <Grid x:Name="MainGrid">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <TabControl>
+                <!-- Suppliers Tab -->
+                <TabItem Header="Suppliers">
+                    <Grid Margin="20">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Header Section -->
+                        <StackPanel Grid.Row="0" Margin="0,0,0,10">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel>
+                                    <TextBlock Text="{DynamicResource Supplier_Title}" FontSize="24" Margin="0,0,0,8"/>
+                                    <TextBlock Text="{DynamicResource Supplier_Subtitle}" FontSize="14" Margin="0,0,0,16"/>
+                                </StackPanel>
+
+                                <Button Grid.Column="1" 
+                                        Content="{DynamicResource Supplier_AddNew}" 
+                                        Command="{Binding AddCommand}"
+                                        VerticalAlignment="Top"
+                                        Margin="0,8,0,0"/>
+                            </Grid>
+
+                            <Border BorderBrush="Gray" BorderThickness="0,1,0,0" Margin="0,10"/>
+                        </StackPanel>
+
+                        <!-- Main Content -->
+                        <Border Grid.Row="1" 
+                                BorderBrush="Gray" 
+                                BorderThickness="1">
+                            <DockPanel>
+                                <!-- Search Box -->
+                                <Border DockPanel.Dock="Top"
+                                        Padding="10">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBox x:Name="searchBox"
+                                              Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                              Tag="{DynamicResource Supplier_Search}"
+                                              Margin="0,0,10,0"/>
+
+                                        <Button Grid.Column="1"
+                                                Content="{DynamicResource Common_Search}"
+                                                Command="{Binding SearchCommand}"
+                                                MinWidth="100"/>
+                                    </Grid>
+                                </Border>
+
+                                <!-- Supplier DataGrid -->
+                                <DataGrid ItemsSource="{Binding Suppliers}"
+                                        SelectedItem="{Binding SelectedSupplier}"
+                                        AutoGenerateColumns="False"
+                                        MouseDoubleClick="DataGrid_MouseDoubleClick">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="{DynamicResource Supplier_Name}" 
+                                                          Binding="{Binding Name}"
+                                                          Width="*"/>
+                                        <DataGridTextColumn Header="{DynamicResource Supplier_Contact}" 
+                                                          Binding="{Binding ContactPerson}"
+                                                          Width="130"/>
+                                        <DataGridTextColumn Header="{DynamicResource Supplier_Phone}" 
+                                                          Binding="{Binding Phone}"
+                                                          Width="120"/>
+                                        <DataGridTextColumn Header="{DynamicResource Supplier_Balance}" 
+                                                          Binding="{Binding Balance, StringFormat=C}"
+                                                          Width="120"/>
+                                        <DataGridCheckBoxColumn Header="{DynamicResource Common_Status}" 
+                                                              Binding="{Binding IsActive}"
+                                                              Width="100"/>
+                                        <DataGridTemplateColumn Width="260">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Button Content="{DynamicResource Common_Edit}" 
+                                                                Click="EditButton_Click"
+                                                                Margin="0,0,8,0"/>
+                                                        <Button Content="{DynamicResource Supplier_Transaction}" 
+                                                                Click="AddTransactionButton_Click"
+                                                                Margin="0,0,8,0"/>
+                                                        <Button Content="{DynamicResource Common_History}" 
+                                                                Click="ViewHistoryButton_Click"
+                                                                Margin="0,0,8,0"/>
+                                                        <Button Content="{DynamicResource Common_Delete}" 
+                                                                Click="DeleteButton_Click"/>
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                    </DataGrid.Columns>
+                                    <DataGrid.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="{DynamicResource Supplier_EditSupplier}" Click="EditMenuItem_Click"/>
+                                            <MenuItem Header="{DynamicResource Supplier_AddTransaction}" Click="AddTransactionMenuItem_Click"/>
+                                            <MenuItem Header="{DynamicResource Supplier_ViewTransactions}" Click="ViewTransactionsMenuItem_Click"/>
+                                            <Separator/>
+                                            <MenuItem Header="{DynamicResource Supplier_DeleteSupplier}" Click="DeleteMenuItem_Click"/>
+                                        </ContextMenu>
+                                    </DataGrid.ContextMenu>
+                                </DataGrid>
+                            </DockPanel>
+                        </Border>
+                    </Grid>
+                </TabItem>
+
+                <!-- Invoices Tab -->
+                <TabItem Header="Supplier Invoices">
+                    <local:SupplierInvoiceView x:Name="SupplierInvoiceView"/>
+                </TabItem>
+            </TabControl>
+        </ScrollViewer>
+
+        <!-- Loading Overlay -->
+        <Border Background="#80000000"
+               Visibility="{Binding IsSaving, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <StackPanel HorizontalAlignment="Center" 
+                    VerticalAlignment="Center">
+                <ProgressBar IsIndeterminate="True" 
+                           Width="120" 
+                           Margin="0,0,0,16"/>
+                <TextBlock Text="{DynamicResource Common_Processing}" 
+                         Foreground="White" 
+                         FontSize="14"
+                         HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Error Message -->
+        <Border Background="#FFF4F4" BorderBrush="#FFD5D5" BorderThickness="1"
+               Visibility="{Binding ErrorMessage, Converter={StaticResource BooleanToVisibilityConverter}}"
+               VerticalAlignment="Bottom"
+               Margin="32,0,32,32"
+               Padding="10">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="⚠️" FontSize="16" Margin="0,0,8,0"/>
+                <TextBlock Text="{Binding ErrorMessage}" 
+                          TextWrapping="Wrap"/>
+            </StackPanel>
+        </Border>
+
+    
+
+     
+
+     
+    </Grid>
+</UserControl>

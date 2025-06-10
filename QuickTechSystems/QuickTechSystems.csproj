@@ -1,0 +1,93 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net8.0-windows</TargetFramework>
+		<!-- Remove hardcoded RuntimeIdentifier to allow publish profile to control it -->
+		<RuntimeIdentifiers>win-x64;win-x86</RuntimeIdentifiers>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<UseWPF>true</UseWPF>
+		<ApplicationIcon>app.ico</ApplicationIcon>
+		<AssemblyVersion>1.0.0.0</AssemblyVersion>
+		<FileVersion>1.0.0.0</FileVersion>
+		<Version>1.0.0</Version>
+		<!-- Keep these for general builds -->
+		<DebugType>embedded</DebugType>
+		<PreserveCompilationContext>true</PreserveCompilationContext>
+		<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
+	</PropertyGroup>
+
+	<!-- Publishing properties - only when publishing -->
+	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
+		<PublishSingleFile>false</PublishSingleFile>
+		<SelfContained>true</SelfContained>
+		<PublishReadyToRun>false</PublishReadyToRun>
+		<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Content Include="appsettings.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="Resources\**">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+
+	<!-- Keep existing Page Remove section -->
+	<ItemGroup>
+		<Page Remove="Resources\Dictionaries\Languages\ar-SA.xaml" />
+		<Page Remove="Resources\Dictionaries\Languages\en-US.xaml" />
+		<Page Remove="Resources\Dictionaries\Languages\fr-FR.xaml" />
+	</ItemGroup>
+
+	<!-- Keep existing PackageReference section -->
+	<ItemGroup>
+		<PackageReference Include="AutoMapper" Version="12.0.1" />
+		<PackageReference Include="AutoMapper.Collection" Version="9.0.0" />
+		<PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
+		<PackageReference Include="EPPlus" Version="7.4.2" />
+		<PackageReference Include="EPPlus.Interfaces" Version="8.0.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.0" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
+		<PackageReference Include="System.Drawing.Common" Version="8.0.0" />
+		<PackageReference Include="System.Windows.Extensions" Version="8.0.0" />
+		<PackageReference Include="TaskScheduler" Version="2.10.1" />
+		<PackageReference Include="Microsoft.Windows.Compatibility" Version="8.0.0" />
+		<PackageReference Include="PresentationFramework" Version="4.6.0" />
+		<PackageReference Include="System.Windows.Controls.DataVisualization.Toolkit" Version="4.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\QuickTechSystems.Application\QuickTechSystems.Application.csproj" />
+		<ProjectReference Include="..\QuickTechSystems.Infrastructure\QuickTechSystems.Infrastructure.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Resource Include="Resources\Dictionaries\Languages\ar-SA.xaml" />
+		<Resource Include="Resources\Dictionaries\Languages\en-US.xaml" />
+		<Resource Include="Resources\Dictionaries\Languages\fr-FR.xaml" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Folder Include="Resources\Images\" />
+	</ItemGroup>
+
+	<!-- Ensure all required files are included during publish -->
+	<Target Name="CopyCustomContent" AfterTargets="Publish">
+		<ItemGroup>
+			<CustomContentFiles Include="appsettings.json" />
+			<CustomContentFiles Include="Resources\**\*" />
+		</ItemGroup>
+		<Copy SourceFiles="@(CustomContentFiles)"
+		      DestinationFiles="@(CustomContentFiles->'$(PublishDir)%(Identity)')"
+		      SkipUnchangedFiles="true" />
+	</Target>
+</Project>

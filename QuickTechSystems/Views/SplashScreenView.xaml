@@ -1,0 +1,105 @@
+﻿<!-- QuickTechSystems.WPF/Views/SplashScreenView.xaml -->
+<Window x:Class="QuickTechSystems.WPF.Views.SplashScreenView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Quick Tech Systems POS" 
+        Height="350" 
+        Width="550"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        Background="Transparent"
+        AllowsTransparency="True">
+
+    <!-- Main Window Border with Shadow Effect -->
+    <Window.Effect>
+        <DropShadowEffect Color="#222222" Direction="0" ShadowDepth="3" Opacity="0.3" BlurRadius="10"/>
+    </Window.Effect>
+
+    <Border CornerRadius="8" Background="#f8f9fa">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Top Section with QT Logo -->
+            <Border Grid.Row="0" Background="#1a73e8" CornerRadius="8,8,0,0">
+                <Grid>
+                    <!-- Stylized QT Logo -->
+                    <Border Width="120" Height="120" CornerRadius="60" 
+                            Background="White" VerticalAlignment="Top" 
+                            HorizontalAlignment="Center" Margin="0,10,0,0">
+                        <Border.Effect>
+                            <DropShadowEffect Color="#333333" Direction="320" ShadowDepth="3" Opacity="0.3" BlurRadius="8"/>
+                        </Border.Effect>
+                        <TextBlock Text="QT" FontFamily="Segoe UI" FontWeight="Bold" FontSize="62" 
+                                   Foreground="#1a73e8" HorizontalAlignment="Center" 
+                                   VerticalAlignment="Center"/>
+                    </Border>
+
+                    <!-- Company Name -->
+                    <StackPanel VerticalAlignment="Bottom" Margin="0,0,0,15">
+                        <TextBlock Text="QUICK TECH SYSTEMS" FontFamily="Segoe UI" 
+                                   FontWeight="SemiBold" FontSize="22" Foreground="White" 
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="Point of Sale Solution" FontFamily="Segoe UI" 
+                                   FontWeight="Light" FontSize="14" Foreground="White" 
+                                   HorizontalAlignment="Center" Opacity="0.9"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Contact Information -->
+            <StackPanel Grid.Row="1" Margin="0,15,0,0">
+                <TextBlock Text="Contact: 71526575" FontFamily="Segoe UI" 
+                           FontSize="14" Foreground="#555555" 
+                           HorizontalAlignment="Center"/>
+                <TextBlock Text="Version 1.0.0" FontFamily="Segoe UI" 
+                           FontSize="12" Foreground="#777777" 
+                           HorizontalAlignment="Center" Margin="0,5,0,15"/>
+            </StackPanel>
+
+            <!-- Loading Status -->
+            <Border Grid.Row="2" Background="#f1f3f4" Padding="25,15" 
+                    BorderThickness="0,1,0,0" BorderBrush="#e1e2e3" 
+                    CornerRadius="0,0,8,8">
+                <StackPanel>
+                    <TextBlock Text="{Binding StatusMessage}" FontFamily="Segoe UI" 
+                               FontSize="13" Foreground="#444444" 
+                               HorizontalAlignment="Center" Margin="0,0,0,10"/>
+
+                    <!-- Styled Progress Bar -->
+                    <Border CornerRadius="4" Height="6" Background="#e1e2e3">
+                        <Border.Clip>
+                            <RectangleGeometry Rect="0,0,550,6" RadiusX="4" RadiusY="4"/>
+                        </Border.Clip>
+                        <Grid>
+                            <Rectangle x:Name="IndeterminateProgressBar" Fill="#1a73e8" Width="100" HorizontalAlignment="Left">
+                                <Rectangle.Triggers>
+                                    <EventTrigger RoutedEvent="Rectangle.Loaded">
+                                        <BeginStoryboard>
+                                            <Storyboard RepeatBehavior="Forever">
+                                                <DoubleAnimation 
+                                                    Storyboard.TargetName="IndeterminateProgressBar"
+                                                    Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)"
+                                                    From="-100" To="550" Duration="0:0:2.5" />
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </EventTrigger>
+                                </Rectangle.Triggers>
+                                <Rectangle.RenderTransform>
+                                    <TranslateTransform X="0"/>
+                                </Rectangle.RenderTransform>
+                            </Rectangle>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Border>
+</Window>

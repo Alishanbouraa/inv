@@ -1,0 +1,412 @@
+﻿<UserControl x:Class="QuickTechSystems.WPF.Views.TableManagementView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:QuickTechSystems.WPF.Views"
+             xmlns:vm="clr-namespace:QuickTechSystems.WPF.ViewModels"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="800"
+             d:DataContext="{d:DesignInstance Type=vm:TableManagementViewModel}">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0">
+                <TextBlock Text="Table Management" Margin="0,0,0,10"/>
+                <TextBlock Text="Manage restaurant tables and their status" Margin="0,0,0,20"/>
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" 
+                        Orientation="Horizontal" 
+                        VerticalAlignment="Top">
+                <Button Command="{Binding AddCommand}" 
+                        Margin="0,0,8,0"
+                        Padding="12,6">
+                    <TextBlock Text="Add Table"/>
+                </Button>
+                <Button Command="{Binding RefreshCommand}" 
+                        Padding="12,6">
+                    <TextBlock Text="Refresh"/>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <!-- Filter and search bar -->
+        <Grid Grid.Row="1" Margin="0,0,0,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBox Grid.Column="0" 
+                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" 
+                     Margin="0,0,10,0"
+                     Padding="8,6"
+                     BorderThickness="1"/>
+        </Grid>
+
+        <!-- Main Content -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Tables List -->
+            <Border Grid.Column="0" 
+                    BorderBrush="Gray" 
+                    BorderThickness="1" 
+                    Margin="0,0,10,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Header -->
+                    <Border Grid.Row="0" 
+                            BorderBrush="Gray" 
+                            BorderThickness="0,0,0,1" 
+                            Padding="20,15">
+                        <TextBlock Text="Tables"/>
+                    </Border>
+
+                    <!-- Table List -->
+                    <ListView Grid.Row="1" 
+                              ItemsSource="{Binding Tables}" 
+                              SelectedItem="{Binding SelectedTable}" 
+                              BorderThickness="0" 
+                              Margin="0,0,0,10">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Setter Property="Padding" Value="10"/>
+                                <Setter Property="BorderBrush" Value="Gray"/>
+                                <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Table Number -->
+                                    <Border Grid.Column="0" 
+                                            BorderBrush="Gray"
+                                            BorderThickness="1"
+                                            Background="LightGray" 
+                                            Width="40" 
+                                            Height="40" 
+                                            Margin="0,0,12,0">
+                                        <TextBlock Text="{Binding TableNumber}" 
+                                                   VerticalAlignment="Center" 
+                                                   HorizontalAlignment="Center"/>
+                                    </Border>
+
+                                    <!-- Table Info -->
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Description}" 
+                                                   FontSize="14"/>
+                                        <TextBlock Text="{Binding Status}" 
+                                                   Margin="0,4,0,0"/>
+                                    </StackPanel>
+
+                                    <!-- Actions -->
+                                    <StackPanel Grid.Column="2" 
+                                                Orientation="Horizontal">
+                                        <Button Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                                Margin="0,0,10,0">
+                                            <TextBlock Text="Edit"/>
+                                        </Button>
+                                        <Button Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                            <TextBlock Text="Delete"/>
+                                        </Button>
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Grid>
+            </Border>
+
+            <!-- Right Panel Container -->
+            <Grid Grid.Column="1">
+                <!-- Edit Form Panel -->
+                <Border BorderBrush="Gray" 
+                        BorderThickness="1" 
+                        Padding="20"
+                        Background="White">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsEditing}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+
+                    <StackPanel>
+                        <TextBlock Text="Edit Table" 
+                                   Margin="0,0,0,20"/>
+
+                        <TextBlock Text="Table Number" 
+                                   Margin="0,0,0,6"/>
+                        <TextBox Text="{Binding NewTable.TableNumber}" 
+                                 BorderBrush="Gray"
+                                 BorderThickness="1"
+                                 Padding="8,6"
+                                 Margin="0,0,0,15"/>
+
+                        <TextBlock Text="Description" 
+                                   Margin="0,0,0,6"/>
+                        <TextBox Text="{Binding NewTable.Description}" 
+                                 BorderBrush="Gray"
+                                 BorderThickness="1"
+                                 Padding="8,6"
+                                 Margin="0,0,0,15"/>
+
+                        <TextBlock Text="Status" 
+                                   Margin="0,0,0,6"/>
+                        <ComboBox ItemsSource="{Binding TableStatuses}" 
+                                  SelectedItem="{Binding NewTable.Status}" 
+                                  BorderBrush="Gray"
+                                  BorderThickness="1"
+                                  Padding="8,6"
+                                  Margin="0,0,0,20"/>
+
+                        <StackPanel Orientation="Horizontal" 
+                                    Margin="0,10,0,0">
+                            <Button Command="{Binding SaveCommand}" 
+                                    Width="80" 
+                                    Margin="0,0,10,0">
+                                <TextBlock Text="Save"/>
+                            </Button>
+                            <Button Command="{Binding CancelCommand}" 
+                                    Width="80">
+                                <TextBlock Text="Cancel"/>
+                            </Button>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Add Form Panel -->
+                <Border BorderBrush="Gray" 
+                        BorderThickness="1" 
+                        Padding="20"
+                        Background="White">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsAdding}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+
+                    <StackPanel>
+                        <TextBlock Text="Add New Table" 
+                                   Margin="0,0,0,20"/>
+
+                        <TextBlock Text="Table Number" 
+                                   Margin="0,0,0,6"/>
+                        <TextBox Text="{Binding NewTable.TableNumber}" 
+                                 BorderBrush="Gray"
+                                 BorderThickness="1"
+                                 Padding="8,6"
+                                 Margin="0,0,0,15"/>
+
+                        <TextBlock Text="Description" 
+                                   Margin="0,0,0,6"/>
+                        <TextBox Text="{Binding NewTable.Description}" 
+                                 BorderBrush="Gray"
+                                 BorderThickness="1"
+                                 Padding="8,6"
+                                 Margin="0,0,0,15"/>
+
+                        <TextBlock Text="Status" 
+                                   Margin="0,0,0,6"/>
+                        <ComboBox ItemsSource="{Binding TableStatuses}" 
+                                  SelectedItem="{Binding NewTable.Status}" 
+                                  BorderBrush="Gray"
+                                  BorderThickness="1"
+                                  Padding="8,6"
+                                  Margin="0,0,0,20"/>
+
+                        <StackPanel Orientation="Horizontal" 
+                                    Margin="0,10,0,0">
+                            <Button Command="{Binding SaveCommand}" 
+                                    Width="80" 
+                                    Margin="0,0,10,0">
+                                <TextBlock Text="Save"/>
+                            </Button>
+                            <Button Command="{Binding CancelCommand}" 
+                                    Width="80">
+                                <TextBlock Text="Cancel"/>
+                            </Button>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Details Panel -->
+                <Border BorderBrush="Gray" 
+                        BorderThickness="1" 
+                        Padding="20"
+                        Background="White">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Visibility" Value="Visible"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsEditing}" Value="True">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsAdding}" Value="True">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Selected table title -->
+                        <TextBlock Grid.Row="0" 
+                                   Text="Table Details" 
+                                   Margin="0,0,0,20"/>
+
+                        <!-- Selected table content - shown only when a table is selected -->
+                        <StackPanel Grid.Row="1" Name="SelectedTableDetails">
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedTable}" Value="{x:Null}">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+
+                            <Border Background="LightGray" 
+                                    Padding="15" 
+                                    Margin="0,0,0,15"
+                                    BorderBrush="Gray"
+                                    BorderThickness="1">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="{Binding SelectedTable.TableNumber, StringFormat='Table #{0}'}"/>
+                                        <TextBlock Text="{Binding SelectedTable.Description}" 
+                                                   Margin="0,4,0,0"/>
+                                    </StackPanel>
+
+                                    <!-- Status Chip -->
+                                    <Border Grid.Column="1" 
+                                            BorderBrush="Gray"
+                                            BorderThickness="1"
+                                            Padding="8,4">
+                                        <TextBlock Text="{Binding SelectedTable.Status}"/>
+                                    </Border>
+                                </Grid>
+                            </Border>
+
+                            <!-- Quick actions section -->
+                            <TextBlock Text="Change Status" 
+                                       Margin="0,0,0,10"/>
+
+                            <UniformGrid Columns="2" Rows="2" Margin="0,0,0,15">
+                                <Button Command="{Binding ChangeStatusCommand}" 
+                                        CommandParameter="Available"
+                                        Margin="0,0,5,5" 
+                                        BorderBrush="Gray"
+                                        BorderThickness="1">
+                                    <TextBlock Text="Available"/>
+                                </Button>
+
+                                <Button Command="{Binding ChangeStatusCommand}" 
+                                        CommandParameter="Occupied"
+                                        Margin="5,0,0,5" 
+                                        BorderBrush="Gray"
+                                        BorderThickness="1">
+                                    <TextBlock Text="Occupied"/>
+                                </Button>
+
+                                <Button Command="{Binding ChangeStatusCommand}" 
+                                        CommandParameter="Reserved"
+                                        Margin="0,5,5,0" 
+                                        BorderBrush="Gray"
+                                        BorderThickness="1">
+                                    <TextBlock Text="Reserved"/>
+                                </Button>
+
+                                <Button Command="{Binding ChangeStatusCommand}" 
+                                        CommandParameter="Maintenance"
+                                        Margin="5,5,0,0" 
+                                        BorderBrush="Gray"
+                                        BorderThickness="1">
+                                    <TextBlock Text="Maintenance"/>
+                                </Button>
+                            </UniformGrid>
+
+                            <!-- Edit/Delete actions -->
+                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                <Button Command="{Binding EditCommand}" 
+                                        Margin="0,0,10,0">
+                                    <TextBlock Text="Edit Table"/>
+                                </Button>
+                                <Button Command="{Binding DeleteCommand}">
+                                    <TextBlock Text="Delete"/>
+                                </Button>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- No table selected message -->
+                        <TextBlock Grid.Row="1" 
+                                   Text="Select a table to view details" 
+                                   HorizontalAlignment="Center" 
+                                   VerticalAlignment="Center">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedTable}" Value="{x:Null}">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>

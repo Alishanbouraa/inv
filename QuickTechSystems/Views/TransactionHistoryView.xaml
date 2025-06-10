@@ -1,0 +1,238 @@
+﻿<UserControl x:Class="QuickTechSystems.WPF.Views.TransactionHistoryView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:converters="clr-namespace:QuickTechSystems.WPF.Converters"
+             mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+    </UserControl.Resources>
+
+    <Grid>
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <Grid x:Name="ContentGrid">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Filter Controls Row -->
+                <Grid Grid.Row="1" Margin="0,0,0,15">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Period label -->
+                    <TextBlock Grid.Column="0" Text="Period:" 
+                               VerticalAlignment="Center" 
+                               Margin="0,0,5,0"/>
+
+                    <!-- Start Date -->
+                    <DatePicker Grid.Column="1" SelectedDate="{Binding StartDate}" 
+                                Margin="0,0,5,0" MinHeight="36" Width="120"/>
+
+                    <!-- to -->
+                    <TextBlock Grid.Column="2" Text="to" VerticalAlignment="Center" 
+                               Margin="0,0,5,0"/>
+
+                    <!-- End Date -->
+                    <DatePicker Grid.Column="3" SelectedDate="{Binding EndDate}" 
+                                Margin="0,0,15,0" MinHeight="36" Width="120"/>
+
+                    <!-- Category label -->
+                    <TextBlock Grid.Column="5" Text="Category:" 
+                               VerticalAlignment="Center" 
+                               Margin="0,0,5,0"/>
+
+                    <!-- Category dropdown -->
+                    <ComboBox Grid.Column="6" ItemsSource="{Binding Categories}"
+                              SelectedItem="{Binding SelectedCategory}"
+                              DisplayMemberPath="Name"
+                              MinHeight="36" Width="150"
+                              Margin="0,0,15,0"/>
+
+                    <!-- Search Box -->
+                    <Grid Grid.Column="7" Margin="0,0,15,0">
+                        <TextBlock Text="search" Foreground="Gray" Margin="5,0,0,0" 
+                                   Visibility="{Binding Text.IsEmpty, ElementName=searchTextBox, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                        <TextBox x:Name="searchTextBox"
+                                 Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                 TextChanged="SearchBox_TextChanged"
+                                 MinHeight="36"
+                                 VerticalContentAlignment="Center"/>
+                    </Grid>
+
+                    <!-- Action Buttons -->
+                    <StackPanel Grid.Column="8" Orientation="Horizontal">
+                        <Button Content="Refresh" Command="{Binding RefreshCommand}"
+                                Width="80" Height="36" Margin="0,0,5,0"/>
+                        <Button Content="Export" Command="{Binding ExportCommand}"
+                                Width="80" Height="36" Margin="0,0,5,0"/>
+                        <Button Content="Print" Command="{Binding PrintReportCommand}"
+                                Width="80" Height="36"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Financial Summary Card -->
+                <Grid Grid.Row="2" Margin="0,0,0,15">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Sales Summary -->
+                    <StackPanel Grid.Column="0" Margin="0,0,15,0">
+                        <TextBlock Text="TOTAL SALES" Margin="0,0,0,6"/>
+                        <TextBlock Text="{Binding TotalSales, StringFormat={}{0:C2}, Mode=OneWay}"/>
+                    </StackPanel>
+
+                    <!-- Profit Summary -->
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="TOTAL PROFIT" Margin="0,0,0,6"/>
+                        <TextBlock Text="{Binding TotalProfit, StringFormat={}{0:C2}, Mode=OneWay}"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- DataGrid -->
+                <DataGrid Grid.Row="3"
+                          ItemsSource="{Binding FilteredTransactions}"
+                          Margin="0,0,0,15"
+                          x:Name="TransactionsDataGrid"
+                          AutoGenerateColumns="False"
+                          RowHeight="48">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="ID" 
+                                           Binding="{Binding TransactionId}" 
+                                           Width="70"/>
+                        <DataGridTextColumn Header="Date" 
+                                           Binding="{Binding TransactionDate, StringFormat=g}" 
+                                           Width="130"/>
+                        <DataGridTextColumn Header="Customer" 
+                                           Binding="{Binding CustomerName}" 
+                                           Width="*" 
+                                           MinWidth="100"/>
+                        <DataGridTextColumn Header="Type" 
+                                           Binding="{Binding TransactionType}" 
+                                           Width="100"/>
+                        <DataGridTextColumn Header="Items" 
+                                           Binding="{Binding Details.Count}" 
+                                           Width="80"/>
+                        <DataGridTextColumn Header="Total" 
+                                           Binding="{Binding TotalAmount, StringFormat=C2}" 
+                                           Width="100"/>
+                        <DataGridTextColumn Header="Status" 
+                                           Binding="{Binding Status}" 
+                                           Width="90"/>
+                        <DataGridTextColumn Header="Payment Method" 
+                                           Binding="{Binding PaymentMethod}" 
+                                           Width="120"/>
+                        <DataGridTextColumn Header="Processed By" 
+                                           Binding="{Binding CashierName}" 
+                                           Width="120"/>
+                        <DataGridTextColumn Header="Role" 
+                                           Binding="{Binding CashierRole}" 
+                                           Width="90"/>
+                        <DataGridTemplateColumn Width="180">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Content="View Details"
+                                                Command="{Binding DataContext.ViewTransactionDetailsCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                CommandParameter="{Binding}"
+                                                MinHeight="40" MinWidth="100"
+                                                Margin="0,0,8,0"/>
+                                        <Button Content="Delete"
+                                                Command="{Binding DataContext.DeleteTransactionCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                CommandParameter="{Binding}"
+                                                MinHeight="40" MinWidth="70"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <!-- Pagination Controls -->
+                <Grid Grid.Row="4" Margin="0,0,0,15">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Page Size Selector -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                        <TextBlock Text="Items per page:" VerticalAlignment="Center" 
+                                  Margin="0,0,8,0"/>
+                        <ComboBox ItemsSource="{Binding AvailablePageSizes}" 
+                                 SelectedItem="{Binding PageSize}" 
+                                 MinHeight="40" MinWidth="80"/>
+                    </StackPanel>
+
+                    <!-- Page Navigation Controls -->
+                    <StackPanel Grid.Column="1" 
+                               HorizontalAlignment="Center" 
+                               Orientation="Horizontal">
+                        <Button Content="◀" 
+                               Command="{Binding PreviousPageCommand}" 
+                               MinHeight="48" MinWidth="48"
+                               Margin="4,0"/>
+                        <Border MinWidth="48" MinHeight="48" Margin="8,0">
+                            <TextBlock Text="{Binding CurrentPage}" 
+                                      VerticalAlignment="Center"
+                                      HorizontalAlignment="Center"/>
+                        </Border>
+                        <Button Content="▶" 
+                               Command="{Binding NextPageCommand}" 
+                               MinHeight="48" MinWidth="48"
+                               Margin="4,0"/>
+                    </StackPanel>
+
+                    <!-- Page Information -->
+                    <StackPanel Grid.Column="2" Orientation="Horizontal">
+                        <TextBlock Text="Page " VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding CurrentPage}" VerticalAlignment="Center"/>
+                        <TextBlock Text=" of " VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding TotalPages}" VerticalAlignment="Center"/>
+                        <TextBlock Text=" (" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding TotalTransactions}" VerticalAlignment="Center"/>
+                        <TextBlock Text=" total)" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Error Message Box -->
+                <TextBlock Grid.Row="5"
+                          Text="{Binding ErrorMessage}"
+                          Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibilityConverter}}"
+                          Margin="0,10,0,0"
+                          Padding="10"/>
+
+                <!-- Loading Overlay -->
+                <Border Grid.Row="0" 
+                       Grid.RowSpan="6" 
+                       Background="#80000000"
+                       Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <ProgressBar IsIndeterminate="True" Width="150" Height="8" Margin="0,0,0,14"/>
+                        <TextBlock Text="Loading..." Foreground="White" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

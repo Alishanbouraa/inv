@@ -1,0 +1,148 @@
+﻿<Window x:Class="QuickTechSystems.Views.LoginView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:converters="clr-namespace:QuickTechSystems.WPF.Converters"
+        Title="{DynamicResource Login_Title}" 
+        Height="460" 
+        Width="380"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        FlowDirection="{Binding FlowDirection}"
+        Background="White">
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+
+        <Style x:Key="LoginButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="250"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Margin" Value="0,25,0,0"/>
+            <Setter Property="Content" Value="Login"/>
+            <Setter Property="Background" Value="Black"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border x:Name="LoginBorder" Background="{TemplateBinding Background}" CornerRadius="20">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#333333" TargetName="LoginBorder" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="TitleTextBlock" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Top"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="FontSize" Value="24" />
+            <Setter Property="Margin" Value="0,0,0,40" />
+        </Style>
+
+        <Style x:Key="LoginTextBox" TargetType="TextBox">
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="Padding" Value="0,5"/>
+            <Setter Property="Margin" Value="0,5,0,20"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+
+        <Style x:Key="LoginPasswordBox" TargetType="PasswordBox">
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="Padding" Value="0,5"/>
+            <Setter Property="Margin" Value="0,5,0,5"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+
+        <Style x:Key="LabelTextBlock" TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="Margin" Value="0,0,0,0"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+
+        <Style x:Key="VersionTextBlock" TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Bottom"/>
+            <Setter Property="Margin" Value="0,0,0,15"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+
+        <StackPanel Grid.Row="1" Margin="40,20" VerticalAlignment="Center">
+            <TextBlock Text="QuickTech Systems" Style="{StaticResource TitleTextBlock}"/>
+
+            <TextBlock Text="Username" Style="{StaticResource LabelTextBlock}"/>
+            <TextBox Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}" 
+                     Style="{StaticResource LoginTextBox}"/>
+
+            <TextBlock Text="Password" Style="{StaticResource LabelTextBlock}"/>
+            <PasswordBox x:Name="PasswordBox" Style="{StaticResource LoginPasswordBox}"/>
+
+            <TextBlock Text="forgot password?" 
+                       HorizontalAlignment="Right" 
+                       Margin="0,5,0,15"
+                       FontSize="12"/>
+
+            <Button x:Name="LoginBtn" 
+                    Style="{StaticResource LoginButtonStyle}"
+                    Command="{Binding LoginCommand}" 
+                    CommandParameter="{Binding ElementName=PasswordBox}"
+                    HorizontalAlignment="Center"/>
+        </StackPanel>
+
+        <TextBlock Grid.Row="2" 
+                   Style="{StaticResource VersionTextBlock}"
+                   Text="Version 1.0.0" />
+
+        <Border Grid.Row="2" 
+               BorderThickness="1"
+               BorderBrush="Gray"
+               Background="LightGray"
+               Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibilityConverter}}"
+               Margin="32,0,32,48">
+            <StackPanel Orientation="Horizontal" Margin="10">
+                <TextBlock Text="⚠️" FontSize="16" Margin="0,0,8,0"/>
+                <TextBlock Text="{Binding ErrorMessage}" 
+                          TextWrapping="Wrap"/>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.RowSpan="3"
+               Background="#80000000"
+               Visibility="{Binding IsProcessing, Converter={StaticResource BooleanToVisibilityConverter}}" RenderTransformOrigin="0.5,0.5">
+            <Border.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform/>
+                    <SkewTransform AngleX="0.163"/>
+                    <RotateTransform/>
+                    <TranslateTransform X="-0.633"/>
+                </TransformGroup>
+            </Border.RenderTransform>
+            <StackPanel HorizontalAlignment="Center" 
+                       VerticalAlignment="Center">
+                <ProgressBar IsIndeterminate="True" 
+                           Width="120" 
+                           Margin="0,0,0,16"/>
+                <TextBlock Text="{DynamicResource Login_LoggingIn}" 
+                         Foreground="White" 
+                         FontWeight="SemiBold"
+                         FontSize="14"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

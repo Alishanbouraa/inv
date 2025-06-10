@@ -1,0 +1,12 @@
+# Edit the .gitignore file first to ensure it contains:
+# Build results
+**/[Bb]in/
+**/[Oo]bj/
+# Visual Studio files
+.vs/
+*.suo
+*.user
+
+*.userosscache
+*.sln.docstates
+

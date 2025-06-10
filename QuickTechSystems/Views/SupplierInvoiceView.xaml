@@ -1,0 +1,172 @@
+﻿<!-- Path: QuickTechSystems.WPF.Views/SupplierInvoiceView.xaml -->
+<UserControl x:Class="QuickTechSystems.WPF.Views.SupplierInvoiceView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:QuickTechSystems.WPF.Views"
+             xmlns:converters="clr-namespace:QuickTechSystems.WPF.Converters"
+             mc:Ignorable="d"
+             x:Name="SupplierInvoiceViewRoot">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converters:DecimalComparisonConverter x:Key="DecimalComparisonConverter"/>
+        <converters:InvoiceStatusToBrushConverter x:Key="InvoiceStatusToBrushConverter"/>
+        <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+        <converters:SumAmountConverter x:Key="SumAmountConverter"/>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header Section -->
+        <Grid Grid.Row="0" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Title and Status Filter -->
+            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,20,0">
+                <TextBlock Text="Supplier Invoices" 
+                           FontSize="24" 
+                           VerticalAlignment="Center"
+                           Margin="0,0,20,0"/>
+
+                <ComboBox ItemsSource="{Binding StatusFilterOptions}"
+                          SelectedItem="{Binding StatusFilter}"
+                          Width="120"
+                          VerticalAlignment="Center"
+                          Margin="0,5,0,0"/>
+            </StackPanel>
+
+            <!-- Add New Invoice Button -->
+            <Button Grid.Column="2" 
+                    Content="Add New Invoice" 
+                    Command="{Binding AddInvoiceCommand}"
+                    Padding="10,5"
+                    VerticalAlignment="Center"/>
+        </Grid>
+
+        <!-- Main Content - Just the Invoice List now -->
+        <Border Grid.Row="1" BorderBrush="Gray" BorderThickness="1">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Top" 
+                           Text="Invoices" 
+                           FontWeight="Bold" 
+                           Margin="10,5"/>
+
+                <TextBlock DockPanel.Dock="Top"
+                           Text="To add products to an invoice, create or edit products from the Products tab and select the invoice."
+                           Foreground="Gray"
+                           FontStyle="Italic"
+                           Margin="10,0,10,10"
+                           TextWrapping="Wrap"/>
+
+                <DataGrid ItemsSource="{Binding Invoices}"
+                          SelectedItem="{Binding SelectedInvoice}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          Margin="5">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Invoice #" 
+                                          Binding="{Binding InvoiceNumber}"
+                                          Width="100"/>
+                        <DataGridTextColumn Header="Supplier" 
+                                          Binding="{Binding SupplierName}"
+                                          Width="150"/>
+                        <DataGridTextColumn Header="Date" 
+                                          Binding="{Binding InvoiceDate, StringFormat=\{0:d\}}"
+                                          Width="90"/>
+                        <DataGridTextColumn Header="Total" 
+                                          Binding="{Binding TotalAmount, StringFormat=C}"
+                                          Width="100"/>
+                        <DataGridTemplateColumn Header="Status" Width="80">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Status}"
+                                               Foreground="{Binding Status, Converter={StaticResource InvoiceStatusToBrushConverter}}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Actions" Width="*">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Content="View Details"
+                                                ToolTip="View invoice and product details"
+                                                Command="{Binding DataContext.ViewInvoiceDetailsCommand, 
+                                                          ElementName=SupplierInvoiceViewRoot}"
+                                                Margin="0,0,5,0"
+                                                Padding="5,2"/>
+
+                                        <!-- Validate Button - Only visible for Draft invoices -->
+                                        <Button Content="Validate"
+                                                Command="{Binding DataContext.ValidateInvoiceCommand, 
+                                                          ElementName=SupplierInvoiceViewRoot}"
+                                                Visibility="{Binding Status, Converter={StaticResource StringToVisibilityConverter}, 
+                                                           ConverterParameter=Draft}"
+                                                Margin="0,0,5,0"
+                                                Padding="5,2"/>
+
+                                        <!-- Settle Button - Only visible for Validated invoices -->
+                                        <Button Content="Settle"
+                                                Command="{Binding DataContext.SettleInvoiceCommand, 
+                                                          ElementName=SupplierInvoiceViewRoot}"
+                                                Visibility="{Binding Status, Converter={StaticResource StringToVisibilityConverter}, 
+                                                           ConverterParameter=Validated}"
+                                                Margin="0,0,5,0"
+                                                Padding="5,2"/>
+
+                                        <!-- View Payments Button - Always visible -->
+                                        <Button Content="Payments"
+                                                Command="{Binding DataContext.ShowPaymentHistoryCommand, 
+                                                          ElementName=SupplierInvoiceViewRoot}"
+                                                Margin="0,0,5,0"
+                                                Padding="5,2"/>
+
+                                        <!-- Delete Button - Only visible for Draft invoices -->
+                                        <Button Content="Delete"
+                                                Command="{Binding DataContext.DeleteInvoiceCommand, 
+                                                          ElementName=SupplierInvoiceViewRoot}"
+                                                Visibility="{Binding Status, Converter={StaticResource StringToVisibilityConverter}, 
+                                                           ConverterParameter=Draft}"
+                                                Margin="0,0,5,0"
+                                                Padding="5,2"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
+        </Border>
+
+      
+       
+
+       
+        
+
+        <!-- Loading Overlay -->
+        <Border Background="#80000000"
+                Visibility="{Binding IsSaving, Converter={StaticResource BooleanToVisibilityConverter}}"
+                Grid.RowSpan="2">
+            <StackPanel HorizontalAlignment="Center" 
+                      VerticalAlignment="Center">
+                <ProgressBar IsIndeterminate="True" 
+                           Width="120" 
+                           Margin="0,0,0,16"/>
+                <TextBlock Text="Processing..." 
+                         Foreground="White" 
+                         FontSize="14"
+                         HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

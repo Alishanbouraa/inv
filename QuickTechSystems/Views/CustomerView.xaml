@@ -1,0 +1,240 @@
+﻿<UserControl x:Class="QuickTechSystems.WPF.Views.CustomerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:QuickTechSystems.WPF.Views"
+             xmlns:converters="clr-namespace:QuickTechSystems.WPF.Converters"
+             FlowDirection="{Binding CurrentFlowDirection}"
+             mc:Ignorable="d"
+             x:Name="CustomerViewRoot">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+        <Style x:Key="ModernButton" TargetType="Button">
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Background" Value="#4A6FBF"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="MinHeight" Value="42"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                              VerticalAlignment="Center" 
+                                              Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#3A5FA9"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Background" Value="#CCCCCC"/>
+                                <Setter Property="Foreground" Value="#888888"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="ActionButton" TargetType="Button" BasedOn="{StaticResource ModernButton}">
+            <Setter Property="MinWidth" Value="75"/>
+            <Setter Property="MinHeight" Value="36"/>
+            <Setter Property="Margin" Value="3"/>
+        </Style>
+        <Style TargetType="DataGridRow">
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#E3EAFF"/>
+                    <Setter Property="BorderBrush" Value="#BBC8F3"/>
+                </Trigger>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#F0F4FF"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style TargetType="DataGrid">
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#DDDDDD"/>
+            <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+            <Setter Property="HorizontalGridLinesBrush" Value="#EEEEEE"/>
+            <Setter Property="CanUserResizeRows" Value="False"/>
+            <Setter Property="HeadersVisibility" Value="Column"/>
+            <Setter Property="RowHeight" Value="48"/>
+            <Setter Property="AlternatingRowBackground" Value="#F9FAFC"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="VerticalGridLinesBrush" Value="Transparent"/>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#CCCCCC"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="BorderBrush" Value="#999999"/>
+                </Trigger>
+                <Trigger Property="IsFocused" Value="True">
+                    <Setter Property="BorderBrush" Value="#4A6FBF"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid x:Name="MainGrid">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <Grid x:Name="ContentGrid" Margin="16">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Header -->
+                <TextBlock Grid.Row="0" Text="CUSTOMER MANAGEMENT" 
+                           HorizontalAlignment="Center" 
+                           FontSize="18" FontWeight="SemiBold"
+                           Margin="0,0,0,20"/>
+
+                <!-- Control Panel -->
+                <Grid Grid.Row="1" Margin="0,0,0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Search Box -->
+                    <Border Grid.Column="0" Margin="0,0,12,0"
+                            Background="White"
+                            BorderThickness="1" 
+                            BorderBrush="#CCCCCC"
+                            CornerRadius="4">
+                        <Grid>
+                            <TextBlock Text="Search customers..." 
+                                       Foreground="#999999" 
+                                       Margin="10,0,0,0" 
+                                       VerticalAlignment="Center"
+                                       Visibility="{Binding Text.IsEmpty, ElementName=searchBox, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                            <TextBox x:Name="searchBox"
+                                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                     MinHeight="42"
+                                     BorderThickness="0"
+                                     Background="Transparent"
+                                     VerticalContentAlignment="Center"
+                                     Padding="10,0"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Action Buttons -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <Button Content="Add New Customer" 
+                                Command="{Binding AddCommand}"
+                                Style="{StaticResource ModernButton}"
+                                Margin="0,0,8,0"
+                                MinWidth="160"/>
+                        <Button Content="Refresh" 
+                                Command="{Binding LoadCommand}"
+                                Style="{StaticResource ModernButton}"
+                                MinWidth="100"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Customer Data Grid -->
+                <DataGrid Grid.Row="2" 
+                          ItemsSource="{Binding Customers}"
+                          SelectedItem="{Binding SelectedCustomer}"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          IsReadOnly="False"
+                          CellEditEnding="DataGrid_CellEditEnding"
+                          MouseDoubleClick="DataGrid_MouseDoubleClick"
+                          Margin="0,0,0,16">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="{DynamicResource Customer_Name}" 
+                                           Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                                           Width="*"/>
+                        <DataGridTextColumn Header="{DynamicResource Customer_Phone}" 
+                                           Binding="{Binding Phone, UpdateSourceTrigger=PropertyChanged}"
+                                           Width="140"/>
+                        <DataGridTextColumn Header="{DynamicResource Customer_Email}" 
+                                           Binding="{Binding Email, UpdateSourceTrigger=PropertyChanged}"
+                                           Width="200"/>
+                        <DataGridTextColumn Header="Balance" 
+                                           Binding="{Binding Balance, StringFormat=C2}"
+                                           IsReadOnly="True"
+                                           Width="120"/>
+                        <DataGridCheckBoxColumn Header="{DynamicResource Customer_Active}" 
+                                               Binding="{Binding IsActive, UpdateSourceTrigger=PropertyChanged}"
+                                               Width="80"/>
+                        <DataGridTemplateColumn Width="Auto">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Content="Edit" 
+                                                Click="EditButton_Click"
+                                                Style="{StaticResource ActionButton}"/>
+                                        <Button Content="Prices" 
+                                                Command="{Binding DataContext.SetProductPricesCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                CommandParameter="{Binding}"
+                                                Style="{StaticResource ActionButton}"/>
+                                        <Button Content="History" 
+                                                Command="{Binding DataContext.ShowPaymentHistoryCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                CommandParameter="{Binding}"
+                                                Style="{StaticResource ActionButton}"/>
+                                        <Button Content="Payment" 
+                                                Command="{Binding DataContext.ShowPaymentDialogCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                CommandParameter="{Binding}"
+                                                Visibility="{Binding Balance, Converter={StaticResource PaymentButtonVisibilityConverter}}"
+                                                Style="{StaticResource ActionButton}"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                    <DataGrid.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Edit Customer" Click="EditMenuItem_Click"/>
+                            <MenuItem Header="Set Custom Prices" Command="{Binding SetProductPricesCommand}"/>
+                            <MenuItem Header="View Payment History" Command="{Binding ShowPaymentHistoryCommand}"/>
+                            <MenuItem Header="Process Payment" 
+                                      Command="{Binding ShowPaymentDialogCommand}"
+                                      Visibility="{Binding SelectedCustomer.Balance, Converter={StaticResource PaymentButtonVisibilityConverter}}"/>
+                            <Separator/>
+                            <MenuItem Header="Delete Customer" Click="DeleteMenuItem_Click"/>
+                        </ContextMenu>
+                    </DataGrid.ContextMenu>
+                </DataGrid>
+
+                <!-- Error Message Box -->
+                <Border Grid.Row="3"
+                       Background="#FFEBEE"
+                       BorderBrush="#FFCDD2"
+                       CornerRadius="4"
+                       BorderThickness="1"
+                       Padding="12,8"
+                       Margin="0,10,0,0"
+                       Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibilityConverter}}">
+                    <TextBlock Text="{Binding ErrorMessage}"
+                              Foreground="#D32F2F"/>
+                </Border>
+            </Grid>
+        </ScrollViewer>
+
+        <!-- Loading Overlay -->
+        <Border Visibility="{Binding IsSaving, Converter={StaticResource BooleanToVisibilityConverter}}"
+                Background="#80000000">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <ProgressBar IsIndeterminate="True" Width="150" Height="4" Margin="0,0,0,16"/>
+                <TextBlock Text="Processing..." Foreground="White" HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>
