@@ -44,11 +44,8 @@ namespace QuickTechSystems.WPF.ViewModels
 
         public DashboardViewModel(
             IServiceProvider serviceProvider,
-            IQuoteService quoteService,
-            ITransactionService transactionService,
-            IDrawerService drawerService,
-            IProductService productService,
-            IEventAggregator eventAggregator)
+             IDrawerService drawerService,
+             IEventAggregator eventAggregator)
             : base(eventAggregator)
         {
             Debug.WriteLine("DashboardViewModel: Constructor called");

@@ -51,7 +51,6 @@
             <converters:ByteArrayToImageConverter x:Key="ByteArrayToImageConverter"/>
             <converters:LessThanZeroConverter x:Key="LessThanZeroConverter"/>
             <converters:NegativeValueConverter x:Key="NegativeValueConverter"/>
-            <converters:CustomerSpecificPriceConverter x:Key="CustomerSpecificPriceConverter"/>
             <converters:CategoryHighlightConverter x:Key="CategoryHighlightConverter"/>
             <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
             <converters:BoolToTextConverter x:Key="BoolToTextConverter"/>
@@ -237,9 +236,7 @@
             <DataTemplate DataType="{x:Type vm:DashboardViewModel}">
                 <views:DashboardView/>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type vm:ProductViewModel}">
-                <views:ProductView/>
-            </DataTemplate>
+            
             <DataTemplate DataType="{x:Type vm:CategoryViewModel}">
                 <views:CategoryView/>
             </DataTemplate>
@@ -252,12 +249,8 @@
             <DataTemplate DataType="{x:Type vm:SupplierViewModel}">
                 <views:SupplierView/>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type vm:TransactionHistoryViewModel}">
-                <views:TransactionHistoryView/>
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type vm:ProfitViewModel}">
-                <views:ProfitView/>
-            </DataTemplate>
+            
+          
             <DataTemplate DataType="{x:Type vm:ExpenseViewModel}">
                 <views:ExpenseView/>
             </DataTemplate>
@@ -267,18 +260,12 @@
             <DataTemplate DataType="{x:Type vm:EmployeeViewModel}">
                 <views:EmployeeView/>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type vm:QuoteViewModel}">
-                <views:QuoteView/>
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type vm:LowStockHistoryViewModel}">
-                <views:LowStockHistoryView/>
-            </DataTemplate>
+          
+           
             <DataTemplate DataType="{x:Type vm:TableManagementViewModel}">
                 <views:TableManagementView/>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type vm:MainStockViewModel}">
-                <views:MainStockView/>
-            </DataTemplate>
+          
         </ResourceDictionary>
     </Application.Resources>
 </Application>

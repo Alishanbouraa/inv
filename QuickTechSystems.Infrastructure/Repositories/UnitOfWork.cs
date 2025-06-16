@@ -15,8 +15,7 @@ namespace QuickTechSystems.Infrastructure.Repositories
         private bool _disposed;
 
         private IGenericRepository<Product>? _products;
-        private IGenericRepository<MainStock>? _mainStocks;
-        private IGenericRepository<InventoryTransfer>? _inventoryTransfers;
+    
         private IGenericRepository<Category>? _categories;
         private IGenericRepository<Customer>? _customers;
         private IGenericRepository<Transaction>? _transactions;
@@ -27,17 +26,12 @@ namespace QuickTechSystems.Infrastructure.Repositories
         private IGenericRepository<Employee>? _employees;
         private IGenericRepository<Drawer>? _drawers;
         private IGenericRepository<InventoryHistory>? _inventoryHistories;
-        private IGenericRepository<Quote>? _quotes;
-        private IGenericRepository<LowStockHistory>? _lowStockHistories;
+        
         private IGenericRepository<RestaurantTable>? _restaurantTables;
         private IGenericRepository<SupplierInvoice>? _supplierInvoices;
         private IGenericRepository<SupplierInvoiceDetail>? _supplierInvoiceDetails;
 
-        public IGenericRepository<MainStock> MainStocks =>
-            _mainStocks ??= new GenericRepository<MainStock>(_context, _contextFactory);
-
-        public IGenericRepository<InventoryTransfer> InventoryTransfers =>
-            _inventoryTransfers ??= new GenericRepository<InventoryTransfer>(_context, _contextFactory);
+       
 
         public IGenericRepository<InventoryHistory> InventoryHistories =>
             _inventoryHistories ??= new GenericRepository<InventoryHistory>(_context, _contextFactory);
@@ -77,8 +71,7 @@ namespace QuickTechSystems.Infrastructure.Repositories
             }
         }
 
-        public IGenericRepository<Quote> Quotes =>
-            _quotes ??= new GenericRepository<Quote>(_context, _contextFactory);
+      
 
         public IGenericRepository<Employee> Employees =>
             _employees ??= new GenericRepository<Employee>(_context, _contextFactory);
@@ -110,9 +103,7 @@ namespace QuickTechSystems.Infrastructure.Repositories
         public IGenericRepository<Supplier> Suppliers =>
             _suppliers ??= new GenericRepository<Supplier>(_context, _contextFactory);
 
-        public IGenericRepository<LowStockHistory> LowStockHistories =>
-            _lowStockHistories ??= new GenericRepository<LowStockHistory>(_context, _contextFactory);
-
+      
         public DbContext Context => _context;
 
         public async Task<int> SaveChangesAsync()
@@ -139,8 +130,6 @@ namespace QuickTechSystems.Infrastructure.Repositories
         {
             _restaurantTables = null;
             _products = null;
-            _mainStocks = null;
-            _inventoryTransfers = null;
             _categories = null;
             _customers = null;
             _transactions = null;
@@ -150,8 +139,6 @@ namespace QuickTechSystems.Infrastructure.Repositories
             _expenses = null;
             _employees = null;
             _drawers = null;
-            _lowStockHistories = null;
-            _quotes = null;
             _supplierInvoices = null;
             _supplierInvoiceDetails = null;
             _inventoryHistories = null;

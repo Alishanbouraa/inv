@@ -18,7 +18,6 @@ namespace QuickTechSystems.ViewModels
     {
         private readonly IAuthService _authService;
         private readonly IDrawerService _drawerService;
-        private readonly IActivityLogger _activityLogger;
         private readonly SemaphoreSlim _operationLock = new SemaphoreSlim(1, 1);
         private FlowDirection _flowDirection = FlowDirection.LeftToRight;
         private string _username = string.Empty;
@@ -52,13 +51,11 @@ namespace QuickTechSystems.ViewModels
         public LoginViewModel(
             IAuthService authService,
             IDrawerService drawerService,
-            IActivityLogger activityLogger,
             IEventAggregator eventAggregator)
             : base(eventAggregator)
         {
             _authService = authService;
             _drawerService = drawerService;
-            _activityLogger = activityLogger;
             LoginCommand = new AsyncRelayCommand(ExecuteLoginAsync, CanExecuteLogin);
         }
 
@@ -92,18 +89,11 @@ namespace QuickTechSystems.ViewModels
                         return;
                     }
 
-                    // Ensure the role is valid
                     if (!Enum.TryParse<UserRole>(employee.Role, true, out var role))
                     {
                         ShowTemporaryErrorMessage("Invalid user role configuration");
                         return;
                     }
-
-                    await _activityLogger.LogActivityAsync(
-                        employee.Username,
-                        "Login",
-                        $"User logged in successfully with role {role}"
-                    );
 
                     App.Current.Properties["CurrentUser"] = employee;
                     await CheckDrawerStatusAndProceed(passwordBox, employee);
@@ -139,20 +129,8 @@ namespace QuickTechSystems.ViewModels
                     if (result != true)
                     {
                         ShowTemporaryErrorMessage("Drawer must be opened to continue");
-                        await _activityLogger.LogActivityAsync(
-                            employee.Username,
-                            "Drawer Opening Cancelled",
-                            "User cancelled drawer opening process",
-                            false
-                        );
                         return;
                     }
-
-                    await _activityLogger.LogActivityAsync(
-                        employee.Username,
-                        "Drawer Opened",
-                        "New cash drawer opened"
-                    );
                 }
 
                 await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
@@ -172,7 +150,6 @@ namespace QuickTechSystems.ViewModels
         {
             Debug.WriteLine($"{context}: {ex}");
 
-            // Special handling for known database errors
             if (ex.Message.Contains("A second operation was started") ||
                 (ex.InnerException != null && ex.InnerException.Message.Contains("A second operation was started")))
             {
@@ -186,14 +163,6 @@ namespace QuickTechSystems.ViewModels
             else
             {
                 ShowTemporaryErrorMessage($"An error occurred during login. Please try again.");
-
-                await _activityLogger.LogActivityAsync(
-                    Username,
-                    "Login Error",
-                    ex.Message,
-                    false,
-                    ex.Message
-                );
             }
         }
 
@@ -201,13 +170,12 @@ namespace QuickTechSystems.ViewModels
         {
             ErrorMessage = message;
 
-            // Automatically clear error after delay
             Task.Run(async () =>
             {
                 await Task.Delay(5000);
                 await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
                 {
-                    if (ErrorMessage == message) // Only clear if still the same message
+                    if (ErrorMessage == message)
                     {
                         ErrorMessage = string.Empty;
                     }

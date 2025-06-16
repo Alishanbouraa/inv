@@ -40,7 +40,7 @@ namespace QuickTechSystems.Domain.Entities
         // Navigation properties
         public virtual Category Category { get; set; } = null!;
         public virtual Supplier? Supplier { get; set; }
-        public virtual MainStock? MainStock { get; set; }
+    
         public virtual ICollection<TransactionDetail> TransactionDetails { get; set; } = new List<TransactionDetail>();
         public virtual ICollection<InventoryHistory> InventoryHistories { get; set; } = new List<InventoryHistory>();
     }

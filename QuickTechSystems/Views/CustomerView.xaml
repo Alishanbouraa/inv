@@ -12,7 +12,8 @@
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
-        <Style x:Key="ModernButton" TargetType="Button">
+
+        <Style x:Key="BaseButton" TargetType="Button">
             <Setter Property="Padding" Value="12,6"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Background" Value="#4A6FBF"/>
@@ -43,80 +44,39 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        <Style x:Key="ActionButton" TargetType="Button" BasedOn="{StaticResource ModernButton}">
+
+        <Style x:Key="ActionButton" TargetType="Button" BasedOn="{StaticResource BaseButton}">
             <Setter Property="MinWidth" Value="75"/>
             <Setter Property="MinHeight" Value="36"/>
             <Setter Property="Margin" Value="3"/>
         </Style>
-        <Style TargetType="DataGridRow">
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Style.Triggers>
-                <Trigger Property="IsSelected" Value="True">
-                    <Setter Property="Background" Value="#E3EAFF"/>
-                    <Setter Property="BorderBrush" Value="#BBC8F3"/>
-                </Trigger>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#F0F4FF"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-        <Style TargetType="DataGrid">
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="BorderBrush" Value="#DDDDDD"/>
-            <Setter Property="GridLinesVisibility" Value="Horizontal"/>
-            <Setter Property="HorizontalGridLinesBrush" Value="#EEEEEE"/>
-            <Setter Property="CanUserResizeRows" Value="False"/>
-            <Setter Property="HeadersVisibility" Value="Column"/>
-            <Setter Property="RowHeight" Value="48"/>
-            <Setter Property="AlternatingRowBackground" Value="#F9FAFC"/>
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="VerticalGridLinesBrush" Value="Transparent"/>
-        </Style>
-        <Style TargetType="TextBox">
-            <Setter Property="Padding" Value="8,4"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="BorderBrush" Value="#CCCCCC"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="BorderBrush" Value="#999999"/>
-                </Trigger>
-                <Trigger Property="IsFocused" Value="True">
-                    <Setter Property="BorderBrush" Value="#4A6FBF"/>
-                </Trigger>
-            </Style.Triggers>
+
+        <Style x:Key="PrimaryButton" TargetType="Button" BasedOn="{StaticResource BaseButton}">
+            <Setter Property="MinWidth" Value="120"/>
         </Style>
     </UserControl.Resources>
 
     <Grid x:Name="MainGrid">
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-            <Grid x:Name="ContentGrid" Margin="16">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
+            <StackPanel x:Name="ContentPanel" Margin="16">
 
-                <!-- Header -->
-                <TextBlock Grid.Row="0" Text="CUSTOMER MANAGEMENT" 
+                <TextBlock Text="CUSTOMER MANAGEMENT" 
                            HorizontalAlignment="Center" 
                            FontSize="18" FontWeight="SemiBold"
                            Margin="0,0,0,20"/>
 
-                <!-- Control Panel -->
-                <Grid Grid.Row="1" Margin="0,0,0,20">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+                <DockPanel Margin="0,0,0,20">
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                        <Button Content="Add New Customer" 
+                                Command="{Binding AddCommand}"
+                                Style="{StaticResource PrimaryButton}"
+                                Margin="0,0,8,0"/>
+                        <Button Content="Refresh" 
+                                Command="{Binding LoadCommand}"
+                                Style="{StaticResource PrimaryButton}"/>
+                    </StackPanel>
 
-                    <!-- Search Box -->
-                    <Border Grid.Column="0" Margin="0,0,12,0"
-                            Background="White"
-                            BorderThickness="1" 
-                            BorderBrush="#CCCCCC"
-                            CornerRadius="4">
+                    <Border Background="White" BorderThickness="1" BorderBrush="#CCCCCC" CornerRadius="4">
                         <Grid>
                             <TextBlock Text="Search customers..." 
                                        Foreground="#999999" 
@@ -132,31 +92,59 @@
                                      Padding="10,0"/>
                         </Grid>
                     </Border>
+                </DockPanel>
 
-                    <!-- Action Buttons -->
-                    <StackPanel Grid.Column="1" Orientation="Horizontal">
-                        <Button Content="Add New Customer" 
-                                Command="{Binding AddCommand}"
-                                Style="{StaticResource ModernButton}"
-                                Margin="0,0,8,0"
-                                MinWidth="160"/>
-                        <Button Content="Refresh" 
-                                Command="{Binding LoadCommand}"
-                                Style="{StaticResource ModernButton}"
-                                MinWidth="100"/>
-                    </StackPanel>
-                </Grid>
-
-                <!-- Customer Data Grid -->
-                <DataGrid Grid.Row="2" 
-                          ItemsSource="{Binding Customers}"
+                <DataGrid ItemsSource="{Binding Customers}"
                           SelectedItem="{Binding SelectedCustomer}"
                           AutoGenerateColumns="False"
                           CanUserAddRows="False"
                           IsReadOnly="False"
                           CellEditEnding="DataGrid_CellEditEnding"
                           MouseDoubleClick="DataGrid_MouseDoubleClick"
-                          Margin="0,0,0,16">
+                          Margin="0,0,0,16"
+                          BorderThickness="1"
+                          BorderBrush="#DDDDDD"
+                          GridLinesVisibility="Horizontal"
+                          HorizontalGridLinesBrush="#EEEEEE"
+                          CanUserResizeRows="False"
+                          HeadersVisibility="Column"
+                          RowHeight="48"
+                          AlternatingRowBackground="#F9FAFC"
+                          Background="White"
+                          VerticalGridLinesBrush="Transparent">
+
+                    <DataGrid.RowStyle>
+                        <Style TargetType="DataGridRow">
+                            <Setter Property="VerticalContentAlignment" Value="Center"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="#E3EAFF"/>
+                                    <Setter Property="BorderBrush" Value="#BBC8F3"/>
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#F0F4FF"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.RowStyle>
+
+                    <DataGrid.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="Padding" Value="8,4"/>
+                            <Setter Property="BorderThickness" Value="1"/>
+                            <Setter Property="BorderBrush" Value="#CCCCCC"/>
+                            <Setter Property="VerticalContentAlignment" Value="Center"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="BorderBrush" Value="#999999"/>
+                                </Trigger>
+                                <Trigger Property="IsFocused" Value="True">
+                                    <Setter Property="BorderBrush" Value="#4A6FBF"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.CellStyle>
+
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="{DynamicResource Customer_Name}" 
                                            Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
@@ -181,10 +169,6 @@
                                         <Button Content="Edit" 
                                                 Click="EditButton_Click"
                                                 Style="{StaticResource ActionButton}"/>
-                                        <Button Content="Prices" 
-                                                Command="{Binding DataContext.SetProductPricesCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                CommandParameter="{Binding}"
-                                                Style="{StaticResource ActionButton}"/>
                                         <Button Content="History" 
                                                 Command="{Binding DataContext.ShowPaymentHistoryCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                 CommandParameter="{Binding}"
@@ -199,10 +183,10 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
                     </DataGrid.Columns>
+
                     <DataGrid.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="Edit Customer" Click="EditMenuItem_Click"/>
-                            <MenuItem Header="Set Custom Prices" Command="{Binding SetProductPricesCommand}"/>
                             <MenuItem Header="View Payment History" Command="{Binding ShowPaymentHistoryCommand}"/>
                             <MenuItem Header="Process Payment" 
                                       Command="{Binding ShowPaymentDialogCommand}"
@@ -213,22 +197,18 @@
                     </DataGrid.ContextMenu>
                 </DataGrid>
 
-                <!-- Error Message Box -->
-                <Border Grid.Row="3"
-                       Background="#FFEBEE"
+                <Border Background="#FFEBEE"
                        BorderBrush="#FFCDD2"
                        CornerRadius="4"
                        BorderThickness="1"
                        Padding="12,8"
                        Margin="0,10,0,0"
                        Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibilityConverter}}">
-                    <TextBlock Text="{Binding ErrorMessage}"
-                              Foreground="#D32F2F"/>
+                    <TextBlock Text="{Binding ErrorMessage}" Foreground="#D32F2F"/>
                 </Border>
-            </Grid>
+            </StackPanel>
         </ScrollViewer>
 
-        <!-- Loading Overlay -->
         <Border Visibility="{Binding IsSaving, Converter={StaticResource BooleanToVisibilityConverter}}"
                 Background="#80000000">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">

@@ -11,14 +11,13 @@ using QuickTechSystems.Application.Services.Interfaces;
 using QuickTechSystems.WPF.Commands;
 using System.Threading.Tasks;
 using System.Threading;
-using QuickTechSystems.Application.Services;
+
 namespace QuickTechSystems.WPF.ViewModels
 {
     public class MainViewModel : ViewModelBase
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly LanguageManager _languageManager;
-        private readonly IActivityLogger _activityLogger;
         private readonly UserRole _currentUserRole;
         private readonly EmployeeDTO _currentUser;
         private readonly SemaphoreSlim _operationLock = new SemaphoreSlim(1, 1);
@@ -33,7 +32,7 @@ namespace QuickTechSystems.WPF.ViewModels
 
         private bool _isNavigationEnabled = true;
         private DateTime _lastNavigationTime = DateTime.MinValue;
-        private const int NAVIGATION_COOLDOWN_MS = 500; // Consider making this configurable if needed
+        private const int NAVIGATION_COOLDOWN_MS = 500;
 
         public ViewModelBase? CurrentViewModel
         {
@@ -85,12 +84,10 @@ namespace QuickTechSystems.WPF.ViewModels
                 if (SetProperty(ref _isRestaurantMode, value))
                 {
                     Debug.WriteLine($"IsRestaurantMode changed to: {value}");
-                    // No need to publish event here - that's handled by the settings view
                 }
             }
         }
 
-        // Role-based visibility properties
         public bool IsAdmin => _currentUserRole == UserRole.Admin;
         public bool IsManager => _currentUserRole == UserRole.Manager || IsAdmin;
         public bool IsCashier => true;
@@ -108,19 +105,16 @@ namespace QuickTechSystems.WPF.ViewModels
             IServiceProvider serviceProvider,
             IEventAggregator eventAggregator,
             LanguageManager languageManager,
-            IActivityLogger activityLogger,
             ISystemPreferencesService preferencesService)
             : base(eventAggregator)
         {
             _serviceProvider = serviceProvider;
             _languageManager = languageManager;
-            _activityLogger = activityLogger;
 
             _currentUser = (EmployeeDTO)App.Current.Properties["CurrentUser"];
             _currentUserRole = Enum.Parse<UserRole>(_currentUser.Role);
-            Debug.WriteLine($"User logged in as: {_currentUser.Role} (Parsed Role: {_currentUserRole})"); // Debug log for role validation
+            Debug.WriteLine($"User logged in as: {_currentUser.Role} (Parsed Role: {_currentUserRole})");
 
-            // Subscribe to restaurant mode changes early
             _eventAggregator.Subscribe<ApplicationModeChangedEvent>(OnApplicationModeChanged);
             Debug.WriteLine("Subscribed to ApplicationModeChangedEvent");
 
@@ -131,14 +125,12 @@ namespace QuickTechSystems.WPF.ViewModels
 
             _languageManager.LanguageChanged += OnLanguageChanged;
 
-            // Initialize and load saved restaurant mode setting
             Task.Run(async () => {
                 try
                 {
                     var restaurantModeStr = await preferencesService.GetPreferenceValueAsync("default", "RestaurantMode", "false");
                     bool restaurantMode = bool.Parse(restaurantModeStr);
 
-                    // Update the property on UI thread
                     await System.Windows.Application.Current.Dispatcher.InvokeAsync(() => {
                         Debug.WriteLine($"Setting IsRestaurantMode to {restaurantMode}");
                         IsRestaurantMode = restaurantMode;
@@ -156,7 +148,6 @@ namespace QuickTechSystems.WPF.ViewModels
 
         private void OnApplicationModeChanged(ApplicationModeChangedEvent evt)
         {
-            // Ensure we're on the UI thread
             System.Windows.Application.Current.Dispatcher.Invoke(() => {
                 Debug.WriteLine($"Restaurant mode event received: {evt.IsRestaurantMode}");
                 IsRestaurantMode = evt.IsRestaurantMode;
@@ -169,12 +160,10 @@ namespace QuickTechSystems.WPF.ViewModels
             {
                 IsLoading = true;
                 LoadingMessage = "Initializing...";
-                await Task.Delay(100); // Prevent UI flicker
+                await Task.Delay(100);
 
-                // Apply restaurant mode setting that was loaded during app startup
                 ((App)System.Windows.Application.Current).ApplyRestaurantModeSetting();
 
-                // Navigate to initial view
                 ExecuteNavigation(GetInitialView());
             }
             catch (Exception ex)
@@ -201,7 +190,6 @@ namespace QuickTechSystems.WPF.ViewModels
 
         private bool CanExecuteNavigation(object? parameter)
         {
-            // Admin bypass takes precedence
             if (_currentUserRole == UserRole.Admin)
                 return true;
 
@@ -227,7 +215,7 @@ namespace QuickTechSystems.WPF.ViewModels
                 "Drawer" => true,
                 "TransactionHistory" => IsManager,
                 "Profit" => IsManager,
-                "Customers" => true, // Changed from IsManager to true - allowing all users including cashiers
+                "Customers" => true,
                 "LowStockHistory" => IsManager,
                 "TableManagement" => IsManager || IsAdmin || IsRestaurantMode,
                 _ => false
@@ -265,43 +253,21 @@ namespace QuickTechSystems.WPF.ViewModels
                 LoadingMessage = $"Loading {destination}...";
                 _lastNavigationTime = DateTime.Now;
 
-                // Fire-and-forget activity logging to prevent DbContext conflicts
-                Task.Run(async () => {
-                    try
-                    {
-                        await _activityLogger.LogActivityAsync(
-                            _currentUser.Username,
-                            "Navigation",
-                            $"Navigated to {destination}"
-                        );
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.WriteLine($"Error logging activity: {ex.Message}");
-                    }
-                });
-
                 try
                 {
                     CurrentViewModel = destination switch
                     {
                         "Dashboard" => _serviceProvider.GetRequiredService<DashboardViewModel>(),
-                        "Products" => _serviceProvider.GetRequiredService<ProductViewModel>(),
-                        "MainStock" => _serviceProvider.GetRequiredService<MainStockViewModel>(),
-                        "Categories" => _serviceProvider.GetRequiredService<CategoryViewModel>(),
+                       "Categories" => _serviceProvider.GetRequiredService<CategoryViewModel>(),
                         "Customers" => _serviceProvider.GetRequiredService<CustomerViewModel>(),
-                        // "Transactions" => _serviceProvider.GetRequiredService<TransactionViewModel>(), // Remove this line
                         "Settings" => _serviceProvider.GetRequiredService<SettingsViewModel>(),
                         "Suppliers" => _serviceProvider.GetRequiredService<SupplierViewModel>(),
-                        "TransactionHistory" => _serviceProvider.GetRequiredService<TransactionHistoryViewModel>(),
-                        "Profit" => _serviceProvider.GetRequiredService<ProfitViewModel>(),
+                       
                         "Expenses" => _serviceProvider.GetRequiredService<ExpenseViewModel>(),
                         "Drawer" => _serviceProvider.GetRequiredService<DrawerViewModel>(),
                         "Employees" => _serviceProvider.GetRequiredService<EmployeeViewModel>(),
-                        "Quotes" => _serviceProvider.GetRequiredService<QuoteViewModel>(),
-                        "LowStockHistory" => _serviceProvider.GetRequiredService<LowStockHistoryViewModel>(),
                         "TableManagement" => _serviceProvider.GetRequiredService<TableManagementViewModel>(),
-                        "Transactions" => _serviceProvider.GetRequiredService<DashboardViewModel>(), // Redirect to Dashboard
+                        "Transactions" => _serviceProvider.GetRequiredService<DashboardViewModel>(),
                         _ => throw new ArgumentException($"Unknown destination: {destination}")
                     };
 
@@ -347,12 +313,6 @@ namespace QuickTechSystems.WPF.ViewModels
                 ErrorMessage = string.Empty;
                 LoadingMessage = "Logging out...";
 
-                await _activityLogger.LogActivityAsync(
-                    _currentUser.Username,
-                    "Logout",
-                    "User logged out"
-                );
-
                 App.Current.Properties.Remove("CurrentUser");
                 System.Windows.Application.Current.Shutdown();
             }
@@ -394,7 +354,6 @@ namespace QuickTechSystems.WPF.ViewModels
                     ErrorMessage = string.Empty;
                     LoadingMessage = "Refreshing...";
 
-                    // Use LoadAsync instead of LoadDataAsync (which is protected)
                     await CurrentViewModel.LoadAsync();
                 }
             }
@@ -413,7 +372,6 @@ namespace QuickTechSystems.WPF.ViewModels
         {
             Debug.WriteLine($"{context}: {ex}");
 
-            // Special handling for known database errors
             if (ex.Message.Contains("A second operation was started") ||
                 (ex.InnerException != null && ex.InnerException.Message.Contains("A second operation was started")))
             {
@@ -433,14 +391,6 @@ namespace QuickTechSystems.WPF.ViewModels
             else
             {
                 ShowTemporaryErrorMessage($"An error occurred. Please try again.");
-
-                await _activityLogger.LogActivityAsync(
-                    _currentUser.Username,
-                    "Application Error",
-                    context,
-                    false,
-                    ex.Message
-                );
             }
         }
 
@@ -448,13 +398,12 @@ namespace QuickTechSystems.WPF.ViewModels
         {
             ErrorMessage = message;
 
-            // Automatically clear error after delay
             Task.Run(async () =>
             {
                 await Task.Delay(5000);
                 await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
                 {
-                    if (ErrorMessage == message) // Only clear if still the same message
+                    if (ErrorMessage == message)
                     {
                         ErrorMessage = string.Empty;
                     }

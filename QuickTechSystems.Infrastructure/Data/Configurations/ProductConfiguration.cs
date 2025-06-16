@@ -45,14 +45,7 @@ namespace QuickTechSystems.Infrastructure.Data.Configurations
                 .HasForeignKey(p => p.CategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Add the relationship to MainStock
-            builder.HasOne(p => p.MainStock)
-                .WithMany(m => m.Products)
-                .HasForeignKey(p => p.MainStockId)
-                .OnDelete(DeleteBehavior.SetNull);
-            // Path: QuickTechSystems.Infrastructure.Data.Configurations/ProductConfiguration.cs
-
-            // Add inside the Configure method
+          
             builder.Property(p => p.WholesalePrice)
                 .HasPrecision(18, 2);
 

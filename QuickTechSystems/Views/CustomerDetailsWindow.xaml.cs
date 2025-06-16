@@ -19,26 +19,30 @@ namespace QuickTechSystems.WPF.Views
         {
             if (e.Key == Key.Escape)
             {
-                CloseButton_Click(sender, e);
+                CloseWindow();
                 e.Handled = true;
             }
         }
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
-            this.DialogResult = false;
-            this.Close();
+            CloseWindow();
         }
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
-            // Execute the Save command
             if (ViewModel.SaveCommand.CanExecute(null))
             {
                 ViewModel.SaveCommand.Execute(null);
                 this.DialogResult = true;
                 this.Close();
             }
+        }
+
+        private void CloseWindow()
+        {
+            this.DialogResult = false;
+            this.Close();
         }
     }
 }

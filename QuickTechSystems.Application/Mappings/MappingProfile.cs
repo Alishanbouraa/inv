@@ -123,44 +123,7 @@ namespace QuickTechSystems.Application.Mappings
             // Employee Mappings
             CreateMap<Employee, EmployeeDTO>();
             CreateMap<EmployeeDTO, Employee>();
-
-            // Quote Related Mappings
-            CreateMap<Quote, QuoteDTO>()
-                .ForMember(dest => dest.CustomerName, opt => opt.MapFrom(src => src.Customer != null ? src.Customer.Name : string.Empty))
-                .ForMember(dest => dest.Details, opt => opt.MapFrom(src => src.QuoteDetails));
-            CreateMap<QuoteDTO, Quote>()
-                .ForMember(dest => dest.QuoteDetails, opt => opt.MapFrom(src => src.Details));
-
-            CreateMap<QuoteDetail, QuoteDetailDTO>()
-                .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product != null ? src.Product.Name : string.Empty));
-            CreateMap<QuoteDetailDTO, QuoteDetail>();
-            // MainStock Mappings
-            // Path: QuickTechSystems.Application.Mappings/MappingProfile.cs
-
-            // MainStock Mappings
-            CreateMap<MainStock, MainStockDTO>()
-                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category != null ? src.Category.Name : string.Empty))
-                .ForMember(dest => dest.SupplierName, opt => opt.MapFrom(src => src.Supplier != null ? src.Supplier.Name : string.Empty));
-
-            CreateMap<MainStockDTO, MainStock>()
-                // Explicitly map stock-related properties to maintain separation
-                .ForMember(dest => dest.CurrentStock, opt => opt.MapFrom(src => src.CurrentStock))
-                .ForMember(dest => dest.NumberOfBoxes, opt => opt.MapFrom(src => src.NumberOfBoxes))
-                .ForMember(dest => dest.ItemsPerBox, opt => opt.MapFrom(src => src.ItemsPerBox));
-
-            // InventoryTransfer Mappings
-            CreateMap<InventoryTransfer, InventoryTransferDTO>()
-                .ForMember(dest => dest.MainStockName, opt => opt.MapFrom(src => src.MainStock != null ? src.MainStock.Name : string.Empty))
-                .ForMember(dest => dest.MainStockBarcode, opt => opt.MapFrom(src => src.MainStock != null ? src.MainStock.Barcode : string.Empty))
-                .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product != null ? src.Product.Name : string.Empty))
-                .ForMember(dest => dest.ProductBarcode, opt => opt.MapFrom(src => src.Product != null ? src.Product.Barcode : string.Empty));
-            CreateMap<InventoryTransferDTO, InventoryTransfer>();
-            // Damaged Goods Mappings
-            CreateMap<DamagedGoods, DamagedGoodsDTO>();
-            CreateMap<DamagedGoodsDTO, DamagedGoods>();
-
-            CreateMap<LowStockHistory, LowStockHistoryDTO>();
-            CreateMap<LowStockHistoryDTO, LowStockHistory>();
+            
             CreateMap<RestaurantTable, RestaurantTableDTO>().ReverseMap();
         }
     }

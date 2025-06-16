@@ -1,5 +1,4 @@
-﻿// QuickTechSystems.WPF/App.xaml.cs
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using QuickTechSystems.Application.Events;
@@ -40,7 +39,6 @@ namespace QuickTechSystems.WPF
         {
             InitializeComponent();
 
-            // Set a consistent culture for the application
             System.Threading.Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
             System.Threading.Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 
@@ -53,23 +51,19 @@ namespace QuickTechSystems.WPF
             ConfigureServices(services);
             _serviceProvider = services.BuildServiceProvider();
 
-            // Store the event aggregator at application level for easier access
             _eventAggregator = _serviceProvider.GetRequiredService<IEventAggregator>();
         }
 
         private void ConfigureServices(IServiceCollection services)
         {
-            // Core Services
             services.AddSingleton<IConfiguration>(_configuration);
             services.AddSingleton<IEventAggregator, EventAggregator>();
             services.AddAutoMapper(typeof(MappingProfile));
             services.AddSingleton<IWindowService, WindowService>();
             services.AddSingleton<LanguageManager>();
-            services.AddScoped<IActivityLogger, ActivityLogger>();
-
-            // Add this line to register your PrinterService
             services.AddScoped<IPrinterService, PrinterService>();
-            // Database Context - Using DbContextPool for better management
+            services.AddScoped<ICustomerPrintService, QuickTechSystems.WPF.Services.CustomerPrintService>();
+
             services.AddDbContextPool<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     _configuration.GetConnectionString("DefaultConnection"),
@@ -77,7 +71,6 @@ namespace QuickTechSystems.WPF
                 .EnableSensitiveDataLogging()
                 .EnableDetailedErrors());
 
-            // DbContext Factory
             services.AddSingleton<IDbContextFactory<ApplicationDbContext>>(provider =>
                 new PooledDbContextFactory<ApplicationDbContext>(
                     new DbContextOptionsBuilder<ApplicationDbContext>()
@@ -87,16 +80,11 @@ namespace QuickTechSystems.WPF
                         .EnableDetailedErrors()
                         .Options));
 
-            // Database Scope Service - Changed to Scoped to resolve DI issue
             services.AddScoped<IDbContextScopeService, DbContextScopeService>();
 
-            // Repositories and Unit of Work
             services.AddTransient<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IBackupService, BackupService>();
-            // In your startup configuration
-            // In the ConfigureServices method, add:
-            services.AddSingleton<IBulkOperationQueueService, BulkOperationQueueService>();
-            // Application Services
+           
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IBarcodeService, BarcodeService>();
             services.AddScoped<IBusinessSettingsService, BusinessSettingsService>();
@@ -105,15 +93,9 @@ namespace QuickTechSystems.WPF
             services.AddScoped<IDrawerService, DrawerService>();
             services.AddScoped<IEmployeeService, EmployeeService>();
             services.AddScoped<IExpenseService, ExpenseService>();
-            services.AddScoped<IProductService, ProductService>();
-            services.AddScoped<IQuoteService, QuoteService>();
             services.AddScoped<ISupplierService, SupplierService>();
             services.AddScoped<ISystemPreferencesService, SystemPreferencesService>();
-            services.AddScoped<IMainStockService, MainStockService>();
-            services.AddScoped<IInventoryTransferService, InventoryTransferService>();
-            services.AddScoped<MainStockViewModel>();
-            services.AddScoped<ITransactionService, TransactionService>();
-            services.AddScoped<ILowStockHistoryService, LowStockHistoryService>();
+           
             services.AddScoped<IRestaurantTableService, RestaurantTableService>();
             services.AddScoped<TableManagementViewModel>();
             services.AddTransient<TableManagementView>();
@@ -123,13 +105,12 @@ namespace QuickTechSystems.WPF
        provider.GetRequiredService<IUnitOfWork>().SupplierInvoices);
             services.AddScoped<IGenericRepository<SupplierInvoiceDetail>>(provider =>
                 provider.GetRequiredService<IUnitOfWork>().SupplierInvoiceDetails);
-            // Splash Screen
+
             services.AddScoped<SplashScreenViewModel>();
 
             services.AddSingleton<IImagePathService, ImagePathService>();
             services.AddTransient<SplashScreenView>();
 
-            // View Models
             services.AddScoped<MainViewModel>();
             services.AddScoped<LoginViewModel>();
             services.AddScoped<DashboardViewModel>();
@@ -138,17 +119,11 @@ namespace QuickTechSystems.WPF
             services.AddScoped<DrawerViewModel>();
             services.AddScoped<EmployeeViewModel>();
             services.AddScoped<ExpenseViewModel>();
-            services.AddScoped<ProductViewModel>();
-            services.AddScoped<ProfitViewModel>();
-            services.AddScoped<QuoteViewModel>();
-            services.AddScoped<SettingsViewModel>();
+             services.AddScoped<SettingsViewModel>();
             services.AddScoped<SupplierViewModel>();
             services.AddScoped<SystemPreferencesViewModel>();
-            services.AddScoped<TransactionHistoryViewModel>();
-            services.AddScoped<IDamagedGoodsService, DamagedGoodsService>();
-            services.AddScoped<LowStockHistoryViewModel>();
-            services.AddTransient<SupplierInvoiceViewModel>();
-            // Views
+             services.AddTransient<SupplierInvoiceViewModel>();
+
             services.AddTransient<MainWindow>();
             services.AddTransient<LoginView>();
             services.AddTransient<CategoryView>();
@@ -156,21 +131,15 @@ namespace QuickTechSystems.WPF
             services.AddTransient<DrawerView>();
             services.AddTransient<EmployeeView>();
             services.AddTransient<ExpenseView>();
-            services.AddTransient<ProductView>();
-            services.AddTransient<ProfitView>();
-            services.AddTransient<QuoteView>();
             services.AddTransient<SettingsView>();
             services.AddTransient<SupplierView>();
             services.AddTransient<SystemPreferencesView>();
-            services.AddTransient<TransactionHistoryView>();
 
             services.AddTransient<QuantityDialog>();
-            services.AddScoped<DamagedGoodsViewModel>();
-        }
+            }
 
         protected override async void OnStartup(StartupEventArgs e)
         {
-            // Set default culture for all UI threads
             FrameworkElement.LanguageProperty.OverrideMetadata(
                 typeof(FrameworkElement),
                 new FrameworkPropertyMetadata(
@@ -180,20 +149,16 @@ namespace QuickTechSystems.WPF
 
             try
             {
-                // Show splash screen
                 var splashViewModel = _serviceProvider.GetRequiredService<SplashScreenViewModel>();
                 var splashView = _serviceProvider.GetRequiredService<SplashScreenView>();
                 splashView.Show();
 
-                // Create log directory
                 var logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs");
                 Directory.CreateDirectory(logPath);
                 File.WriteAllText(Path.Combine(logPath, "startup.log"), $"Application starting at {DateTime.Now}...");
 
-                // Update splash screen status
                 splashViewModel.UpdateStatus("Initializing database...");
 
-                // Continue with initialization in a separate thread to keep UI responsive
                 await Task.Run(async () =>
                 {
                     using (var scope = _serviceProvider.CreateScope())
@@ -215,7 +180,6 @@ namespace QuickTechSystems.WPF
                             splashViewModel.UpdateStatus("Creating default admin account...");
                             DatabaseInitializer.SeedDefaultAdmin(context);
 
-                            // Ensure default preferences are initialized
                             splashViewModel.UpdateStatus("Setting up system preferences...");
                             const string userId = "default";
                             var hasPreferences = await systemPreferencesService.GetPreferenceValueAsync(userId, "Initialized", "false");
@@ -227,7 +191,6 @@ namespace QuickTechSystems.WPF
                         }
                         catch (Exception dbEx)
                         {
-                            // Use Dispatcher to show message box from background thread
                             Dispatcher.Invoke(() =>
                             {
                                 MessageBox.Show(
@@ -242,7 +205,6 @@ namespace QuickTechSystems.WPF
 
                         try
                         {
-                            // Load business settings first (before language settings)
                             splashViewModel.UpdateStatus("Loading business settings...");
                             var rateSetting = await businessSettingsService.GetByKeyAsync("ExchangeRate");
                             if (rateSetting != null && decimal.TryParse(rateSetting.Value, out decimal rate))
@@ -250,13 +212,11 @@ namespace QuickTechSystems.WPF
                                 CurrencyHelper.UpdateExchangeRate(rate);
                             }
 
-                            // Keep track of restaurant mode for later use
                             string restaurantModeStr = "false";
                             bool isRestaurantMode = false;
 
                             try
                             {
-                                // Load restaurant mode setting but don't apply it yet
                                 splashViewModel.UpdateStatus("Loading user preferences...");
                                 restaurantModeStr = await systemPreferencesService.GetPreferenceValueAsync("default", "RestaurantMode", "false");
                                 isRestaurantMode = bool.Parse(restaurantModeStr);
@@ -267,13 +227,11 @@ namespace QuickTechSystems.WPF
                                 Debug.WriteLine($"Error loading restaurant mode preference: {prefEx.Message}");
                             }
 
-                            // Load language setting and apply in UI thread
                             try
                             {
                                 splashViewModel.UpdateStatus("Setting language preferences...");
                                 var defaultLanguage = await systemPreferencesService.GetPreferenceValueAsync("default", "Language", "en-US");
 
-                                // Apply language on UI thread to avoid cross-thread issues
                                 await Dispatcher.Invoke(async () =>
                                 {
                                     await languageManager.SetLanguage(defaultLanguage);
@@ -284,7 +242,6 @@ namespace QuickTechSystems.WPF
                                 Debug.WriteLine($"Error setting language: {langEx.Message}");
                             }
 
-                            // We'll apply the restaurant mode setting later, after login
                             if (isRestaurantMode)
                             {
                                 Properties["RestaurantModeEnabled"] = true;
@@ -297,14 +254,11 @@ namespace QuickTechSystems.WPF
                         }
                     }
 
-                    // Final preparation before showing login
                     splashViewModel.UpdateStatus("Launching application...");
 
-                    // Delay for a moment to ensure splash screen is visible
                     await Task.Delay(800);
                 });
 
-                // Show the login screen and close splash screen
                 Dispatcher.Invoke(() =>
                 {
                     var loginView = _serviceProvider.GetRequiredService<LoginView>();
@@ -330,14 +284,12 @@ namespace QuickTechSystems.WPF
                 }
                 catch
                 {
-                    // If we can't log the error, just shutdown
                 }
 
                 Shutdown();
             }
         }
 
-        // Method to be called from MainViewModel.InitializeAsync to apply restaurant mode setting
         public void ApplyRestaurantModeSetting()
         {
             if (Properties.Contains("RestaurantModeEnabled") && (bool)Properties["RestaurantModeEnabled"])

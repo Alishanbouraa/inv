@@ -18,8 +18,7 @@ namespace QuickTechSystems.WPF.ViewModels
     {
         private readonly ISupplierInvoiceService _supplierInvoiceService;
         private readonly ISupplierService _supplierService;
-        private readonly IProductService _productService;
-        private ObservableCollection<SupplierInvoiceDTO> _invoices;
+       private ObservableCollection<SupplierInvoiceDTO> _invoices;
         private SupplierInvoiceDTO? _selectedInvoice;
         private ObservableCollection<SupplierDTO> _suppliers;
         private readonly Action<EntityChangedEvent<SupplierDTO>> _supplierChangedHandler;
@@ -235,13 +234,11 @@ namespace QuickTechSystems.WPF.ViewModels
         public SupplierInvoiceViewModel(
     ISupplierInvoiceService supplierInvoiceService,
     ISupplierService supplierService,
-    IProductService productService,
-    IEventAggregator eventAggregator) : base(eventAggregator)
+     IEventAggregator eventAggregator) : base(eventAggregator)
         {
 
             _supplierInvoiceService = supplierInvoiceService;
             _supplierService = supplierService;
-            _productService = productService;
             _invoices = new ObservableCollection<SupplierInvoiceDTO>();
             _suppliers = new ObservableCollection<SupplierDTO>();
             _products = new ObservableCollection<ProductDTO>();
@@ -442,7 +439,6 @@ namespace QuickTechSystems.WPF.ViewModels
 
                 await Task.WhenAll(
                     LoadSuppliersAsync(),
-                    LoadProductsAsync(),
                     LoadInvoicesAsync()
                 );
             }
@@ -479,24 +475,7 @@ namespace QuickTechSystems.WPF.ViewModels
             }
         }
 
-        private async Task LoadProductsAsync()
-        {
-            try
-            {
-                var products = await _productService.GetAllAsync();
-
-                await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
-                {
-                    Products = new ObservableCollection<ProductDTO>(products);
-                    FilterProducts();
-                });
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Error loading products: {ex.Message}");
-                throw;
-            }
-        }
+     
 
         private async Task LoadInvoicesAsync()
         {

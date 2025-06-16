@@ -8,126 +8,89 @@ namespace QuickTechSystems.WPF.Views
 {
     public partial class CustomerView : UserControl
     {
+        private CustomerViewModel ViewModel => DataContext as CustomerViewModel;
+
         public CustomerView()
         {
             InitializeComponent();
-            this.Loaded += CustomerView_Loaded;
-            this.SizeChanged += OnControlSizeChanged;
+            this.Loaded += OnLoaded;
+            this.SizeChanged += OnSizeChanged;
         }
 
-        private void CustomerView_Loaded(object sender, RoutedEventArgs e)
+        private void OnLoaded(object sender, RoutedEventArgs e)
         {
-            if (DataContext != null)
-            {
-            }
-
-            AdjustLayoutForSize();
+            AdjustLayoutForWindowSize();
         }
 
-
-        private void OnControlSizeChanged(object sender, SizeChangedEventArgs e)
+        private void OnSizeChanged(object sender, SizeChangedEventArgs e)
         {
-            AdjustLayoutForSize();
+            AdjustLayoutForWindowSize();
         }
-        private void DataGrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
-        {
-            if (e.EditAction == DataGridEditAction.Commit)
-            {
-                var viewModel = DataContext as CustomerViewModel;
-                var customer = e.Row.Item as CustomerDTO;
 
-                if (viewModel != null && customer != null)
-                {
-                    // Start the update process without awaiting to avoid UI freezing
-                    _ = viewModel.UpdateCustomerDirectEdit(customer);
-                }
-            }
-        }
-        private void AdjustLayoutForSize()
+        private void AdjustLayoutForWindowSize()
         {
             var parentWindow = Window.GetWindow(this);
-            if (parentWindow == null) return;
+            if (parentWindow?.ActualWidth == null) return;
 
-            double windowWidth = parentWindow.ActualWidth;
+            var windowWidth = parentWindow.ActualWidth;
+            var margin = windowWidth switch
+            {
+                >= 1920 => new Thickness(32),
+                >= 1366 => new Thickness(24),
+                >= 800 => new Thickness(16),
+                _ => new Thickness(8)
+            };
 
-            // Adjust margins based on window width
-            if (windowWidth >= 1920)
+            ContentPanel.Margin = margin;
+        }
+
+        private void DataGrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
+        {
+            if (e.EditAction == DataGridEditAction.Commit &&
+                e.Row.Item is CustomerDTO customer &&
+                ViewModel != null)
             {
-                ContentGrid.Margin = new Thickness(32);
-            }
-            else if (windowWidth >= 1366)
-            {
-                ContentGrid.Margin = new Thickness(24);
-            }
-            else if (windowWidth >= 800)
-            {
-                ContentGrid.Margin = new Thickness(16);
-            }
-            else
-            {
-                ContentGrid.Margin = new Thickness(8);
+                _ = ViewModel.UpdateCustomerDirectEdit(customer);
             }
         }
 
         private void DataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            if (sender is DataGrid grid && grid.SelectedItem is CustomerDTO customer &&
-                DataContext is CustomerViewModel viewModel)
+            if (sender is DataGrid grid &&
+                grid.SelectedItem is CustomerDTO customer &&
+                ViewModel != null)
             {
-                viewModel.EditCustomer(customer);
+                ViewModel.EditCustomer(customer);
             }
         }
 
         private void EditButton_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button button &&
-                button.DataContext is CustomerDTO customer &&
-                DataContext is CustomerViewModel viewModel)
+            if (GetCustomerFromSender(sender) is CustomerDTO customer)
             {
-                viewModel.EditCustomer(customer);
-            }
-        }
-
-        private void DeleteButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is Button button &&
-                button.DataContext is CustomerDTO customer &&
-                DataContext is CustomerViewModel viewModel)
-            {
-                viewModel.SelectedCustomer = customer;
-                if (viewModel.DeleteCommand.CanExecute(null))
-                {
-                    viewModel.DeleteCommand.Execute(null);
-                }
+                ViewModel?.EditCustomer(customer);
             }
         }
 
         private void EditMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext is CustomerViewModel viewModel &&
-                viewModel.SelectedCustomer != null)
+            if (ViewModel?.SelectedCustomer != null)
             {
-                viewModel.EditCustomer(viewModel.SelectedCustomer);
+                ViewModel.EditCustomer(ViewModel.SelectedCustomer);
             }
         }
 
         private void DeleteMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext is CustomerViewModel viewModel &&
-                viewModel.SelectedCustomer != null &&
-                viewModel.DeleteCommand.CanExecute(null))
+            if (ViewModel?.SelectedCustomer != null && ViewModel.DeleteCommand.CanExecute(null))
             {
-                viewModel.DeleteCommand.Execute(null);
+                ViewModel.DeleteCommand.Execute(null);
             }
         }
 
-        private void ResetPrice_Click(object sender, RoutedEventArgs e)
+        private CustomerDTO GetCustomerFromSender(object sender)
         {
-            if (sender is Button button &&
-                button.DataContext is CustomerProductPriceViewModel priceModel)
-            {
-                priceModel.CustomPrice = priceModel.DefaultPrice;
-            }
+            return sender is Button button ? button.DataContext as CustomerDTO : null;
         }
     }
 }
